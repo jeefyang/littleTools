@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "lib": [
+            "esnext",
+            "dom"
+        ],
+        "target": "esnext",
+        "module": "esnext",
+        "esModuleInterop": true,
+        "strict": true,
+        "moduleResolution": "node",
+        "noEmit": true
+    },
+    "include": [
+        "server/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
