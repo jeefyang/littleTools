@@ -37,15 +37,13 @@ app.get("/res/{*splat}", (req, res) => {
         e && res.sendStatus(404);
     });
 });
-// 网页端的 Vue 目录
-const vueDir = process.env.VITE_NODE_ENV == 'development' ? './' : './build_vue';
-console.log(process.env.VITE_NODE_ENV, process.env.VITE_TOKEN);
+
 (async () => {
     // 开发模式下,直接去读取 vite 的配置文件
     if (process.env.NODE_ENV == 'development') {
         const { createServer } = await import('vite');
         const vite = await createServer({
-            root: path.resolve(path.join(vueDir)),
+            root: path.resolve(path.join(process.env.VITE_VUE_DIR)),
             server: { middlewareMode: true },
             configFile: path.resolve('./vite.config.ts')
         });
@@ -55,14 +53,14 @@ console.log(process.env.VITE_NODE_ENV, process.env.VITE_TOKEN);
     else {
         // 默认index.html
         app.get('/', (req, res) => {
-            res.sendFile(path.resolve(path.join(vueDir, 'index.html')));
+            res.sendFile(path.resolve(path.join(process.env.VITE_VUE_DIR, 'index.html')));
         });
         // 其他路径
         app.get("/{*splat}", (req, res) => {
             const splat: string[] = (<any>req.params).splat;
-            res.sendFile(path.resolve(path.join(vueDir, splat.join('/'))), (e) => {
+            res.sendFile(path.resolve(path.join(process.env.VITE_VUE_DIR, splat.join('/'))), (e) => {
                 // 如果找不到文件,则返回 index.html
-                e && res.sendFile(path.resolve(path.join(vueDir, 'index.html')));
+                e && res.sendFile(path.resolve(path.join(process.env.VITE_VUE_DIR, 'index.html')));
             });
         });
         app.listen(configData.port);

@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
+import layout from './views/common/layout.vue'
 
 const msg = ref('')
 
@@ -9,11 +10,12 @@ onMounted(async () => {
   console.log(import.meta.env.VITE_NODE_ENV)
   const data = await fetch('/api/test').then((res) => res.json())
   msg.value = data.msg
+  console.log(import.meta.env.VITE_TOKEN)
 })
 </script>
 
 <template>
-  <header>
+  <!-- <header>
     <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
@@ -24,7 +26,7 @@ onMounted(async () => {
         <RouterLink to="/about">About</RouterLink>
       </nav>
     </div>
-  </header>
+  </header> -->
 
   <RouterView />
 </template>
