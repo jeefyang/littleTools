@@ -29,3 +29,6 @@ coverage
 
 *.tsbuildinfo
 config.jsonc
+
+build_server
+build_vue

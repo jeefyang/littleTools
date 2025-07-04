@@ -8,6 +8,7 @@
         "build:vue": "vite build --outDir build_vue",
         "build:server": "vite build -c vite.config.server.ts --outDir build_server",
         "build:all": "run-p build:vue build:server",
+        "start:server": "nodemon build_server/main.js",
         "preview": "vite preview",
         "type-check": "vue-tsc --build",
         "format": "prettier --write src/"
