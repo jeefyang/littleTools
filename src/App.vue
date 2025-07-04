@@ -1,6 +1,15 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
+
+const msg = ref('')
+
+onMounted(async () => {
+  console.log(import.meta.env.VITE_NODE_ENV)
+  const data = await fetch('/api/test').then((res) => res.json())
+  msg.value = data.msg
+})
 </script>
 
 <template>
@@ -8,7 +17,7 @@ import HelloWorld from './components/HelloWorld.vue'
     <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
-      <HelloWorld msg="You did it88!" />
+      <HelloWorld :msg="msg" />
 
       <nav>
         <RouterLink to="/">Home</RouterLink>

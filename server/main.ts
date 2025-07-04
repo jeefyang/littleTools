@@ -7,6 +7,7 @@ import cors from "cors";
 const jsonUrl = './config.jsonc';
 const exampleJsonUrl = './config.example.jsonc';
 
+
 if (!fs.existsSync(jsonUrl)) {
     if (!fs.existsSync(exampleJsonUrl)) {
         console.error(`例子配置文件 ${exampleJsonUrl} 不存在,无法启动服务`);
@@ -20,12 +21,25 @@ console.log(configData);
 const app = express();
 app.use(cors());
 
+// 接口
 app.get("/api/test", (req, res) => {
-    res.json({ msg: "hello world", envir: process.env.NODE_ENV });
+    res.json({ msg: "hello world!!!", env: process.env.VITE_NODE_ENV });
+});
+// 没有接口
+app.get("/api/{*splat}", (req, res) => {
+    res.json({ msg: "查无接口", status: 404 });
 });
 
-const vueDir = process.env.NODE_ENV == 'development' ? './' : './build_vue';
+// 静态资源目录
+app.get("/res/{*splat}", (req, res) => {
+    const splat: string[] = (<any>req.params).splat;
+    res.sendFile(path.resolve(path.join('./res', splat.join('/'))), (e) => {
+        e && res.sendStatus(404);
+    });
+});
 
+const vueDir = process.env.VITE_NODE_ENV == 'development' ? './' : './build_vue';
+console.log(process.env.VITE_NODE_ENV, process.env.VITE_TOKEN);
 (async () => {
     if (process.env.NODE_ENV == 'development') {
         const { createServer } = await import('vite');
@@ -42,9 +56,9 @@ const vueDir = process.env.NODE_ENV == 'development' ? './' : './build_vue';
             res.sendFile(path.resolve(path.join(vueDir, 'index.html')));
         });
         app.get("/{*splat}", (req, res) => {
-            //@ts-ignore
-            res.sendFile(path.resolve(path.join(vueDir, req.params.splat.join('/'))), (e) => {
-                res.send("路径不存在");
+            const splat: string[] = (<any>req.params).splat;
+            res.sendFile(path.resolve(path.join(vueDir, splat.join('/'))), (e) => {
+                e && res.sendFile(path.resolve(path.join(vueDir, 'index.html')));
             });
         });
         app.listen(configData.port);

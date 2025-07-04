@@ -12,7 +12,8 @@
         "noEmit": true
     },
     "include": [
-        "server/**/*.ts"
+        "env.d.ts",
+        "server/**/*.ts",
     ],
     "exclude": [
         "node_modules"

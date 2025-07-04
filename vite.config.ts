@@ -1,6 +1,6 @@
 import { fileURLToPath, URL } from 'node:url';
 
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import vueDevTools from 'vite-plugin-vue-devtools';
@@ -9,6 +9,7 @@ import fs from 'node:fs';
 // https://vite.dev/config/
 // @ts-ignore
 export default defineConfig(({ mode }) => {
+    const env = loadEnv(mode, process.cwd(), ''); // 加载所有环境变量
     const exampleJsonUrl = './config.example.jsonc';
     let target = '';
     if (mode == 'development') {
@@ -17,6 +18,9 @@ export default defineConfig(({ mode }) => {
     }
 
     return {
+        define: {
+            'process.env': env
+        },
         plugins: [
             vue(),
             //@ts-ignore
