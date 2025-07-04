@@ -21,6 +21,12 @@ console.log(configData);
 const app = express();
 app.use(cors());
 
+// 路由列表
+app.get("/api/routerList", (req, res) => {
+    res.json({ msg: "操作成功", data: eval(`(${fs.readFileSync(`${process.env.VITE_PRIVATE_RES_DIR}/router.json`)})`) });
+
+});
+
 // 接口
 app.get("/api/test", (req, res) => {
     res.json({ msg: "hello world!!!", env: process.env.VITE_NODE_ENV });

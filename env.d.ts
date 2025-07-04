@@ -5,6 +5,10 @@ type env = {
     VITE_TOKEN: string;
     /** 网页端的 Vue 目录 */
     VITE_VUE_DIR: string;
+    /** 资源目录 */
+    VITE_RES_DIR: string;
+    /** 私有资源目录 */
+    VITE_PRIVATE_RES_DIR: string;
 };
 
 declare namespace NodeJS {

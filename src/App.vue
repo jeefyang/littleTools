@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
 import layout from './views/common/layout.vue'
+import { RouterInit } from './router/routerInit'
+const router = useRouter()
 
 const msg = ref('')
 
@@ -11,6 +13,8 @@ onMounted(async () => {
   const data = await fetch('/api/test').then((res) => res.json())
   msg.value = data.msg
   console.log(import.meta.env.VITE_TOKEN)
+
+  await RouterInit.init(router)
 })
 </script>
 

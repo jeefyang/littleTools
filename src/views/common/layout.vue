@@ -4,7 +4,6 @@
     123
     <RouterView v-slot="{ Component, route }">
       <KeepAlive>
-        {{ $route.fullPath }}
         <component :is="Component" :key="$route.fullPath"></component>
       </KeepAlive>
     </RouterView>
