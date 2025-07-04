@@ -6,6 +6,7 @@ import fs from "node:fs";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), ''); // 加载所有环境变量
+    // 仅在开发使用
     const exampleJsonUrl = './config.example.jsonc';
     const port = mode == "development" ? eval(`(${fs.readFileSync(exampleJsonUrl, "utf-8")})`).port : 3000;
     return {

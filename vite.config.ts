@@ -10,6 +10,7 @@ import fs from 'node:fs';
 // @ts-ignore
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), ''); // 加载所有环境变量
+    // 仅在开发使用
     const exampleJsonUrl = './config.example.jsonc';
     let target = '';
     if (mode == 'development') {
@@ -28,6 +29,7 @@ export default defineConfig(({ mode }) => {
             //@ts-ignore
             vueDevTools(),
         ],
+        // 仅开发使用
         server: {
             proxy: {
                 '/api': {
