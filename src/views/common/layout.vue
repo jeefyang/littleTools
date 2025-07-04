@@ -1,7 +1,6 @@
 <template>
   <!-- 主体 -->
   <div class="main">
-    123
     <RouterView v-slot="{ Component, route }">
       <KeepAlive>
         <component :is="Component" :key="$route.fullPath"></component>
