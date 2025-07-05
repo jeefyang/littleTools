@@ -11,7 +11,7 @@
     @click="clickBtn"
     @dblclick="dblclickBtn"
   >
-    <n-icon style="user-select: none">
+    <n-icon style="user-select: none" :size="floatW / 1.5">
       <img src="@/assets/navigation.svg" alt="" />
     </n-icon>
     <div class="over"></div>
@@ -30,7 +30,7 @@ const floatLeft = ref(20)
 /** 悬浮按钮下坐标 */
 const floatBottom = ref(100)
 /** 悬浮按钮宽度 */
-const floatW = 40
+const floatW = ref(40)
 
 let pressTimer: number = -1
 let dragE: { mouse?: MouseEvent; touch?: NonNullable<TouchEvent> } = {}
@@ -82,6 +82,9 @@ const onDownFn = (e: typeof dragE) => {
       }
     }
     dragE = e
+    floatW.value = 60
+    floatLeft.value -= 10
+    floatBottom.value -= 10
     ;(e.mouse || e.touch)?.preventDefault?.() // 阻止默认行为
   }, 200)
 }
@@ -101,11 +104,11 @@ const onMoveFn = (e: typeof dragE) => {
   const y = dragT.screenY - t.screenY
   dragE = e
   floatLeft.value = Math.min(
-    bodyDiv.clientWidth - floatW,
+    bodyDiv.clientWidth - floatW.value,
     Math.max(floatLeft.value + x, bodyDiv.offsetLeft),
   )
   floatBottom.value = Math.min(
-    bodyDiv.clientHeight - floatW,
+    bodyDiv.clientHeight - floatW.value,
     Math.max(floatBottom.value + y, bodyDiv.offsetTop),
   )
 }
@@ -113,6 +116,7 @@ const onMoveFn = (e: typeof dragE) => {
 const onUpFn = (e: typeof dragE) => {
   dragE = {}
   moveE = {}
+  floatW.value = 40
   clearTimeout(pressTimer) // 清除定时器
 }
 
