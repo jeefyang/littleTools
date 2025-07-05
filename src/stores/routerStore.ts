@@ -1,12 +1,14 @@
+import { defineStore } from "pinia";
+import { ref } from "vue";
 import type { Router } from "vue-router";
 
-export class RouterInit {
 
-    static views = import.meta.glob('../views/**/*.vue');
+export const useRouterStore = defineStore('router', () => {
+    const routerList = ref(<{ absUrl: string, title: string, router: string; }[]>[]);
+    const views = import.meta.glob('../views/**/*.vue');
 
-
-    static getView = (name: string) => {
-        const view = RouterInit.views[`../views/${name}.vue`];
+    const getView = (name: string) => {
+        const view = views[`../views/${name}.vue`];
 
         if (!view) {
             throw Error(`视图不存在: ${name}`);
@@ -14,31 +16,24 @@ export class RouterInit {
         return view;
     };
 
-    static async init(router: Router) {
+    const init = async (router: Router) => {
+
         const res: {
             data: { [x in string]: any };
         } = await (await fetch('/api/routerList')).json();
-
+        const list = [];
         for (let key in res.data) {
             const item = res.data[key];
             let view = null;
             try {
-                view = RouterInit.getView(item.router);
+                view = getView(item.router);
             } catch (e) {
                 console.warn(`视图不存在: ${item.router}`);
             }
             if (!view) {
                 continue;
             }
-            console.log({
-                path: item.router,
-                name: item.router,
-                component: view,
-                meta: {
-                    title: item.title,
-                    keepAlive: true,
-                },
-            });
+            list.push(item);
             router.addRoute('/', {
                 path: item.router,
                 name: item.router,
@@ -49,9 +44,13 @@ export class RouterInit {
                 },
             });
         }
+        routerList.value = list;
         await router.push('');
-    }
+    };
 
-
-
-}
+    return {
+        routerList,
+        getView,
+        init
+    };
+});

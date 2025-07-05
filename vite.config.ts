@@ -66,7 +66,6 @@ export default defineConfig(({ mode }) => {
         const port = eval(`(${fs.readFileSync(exampleJsonUrl, "utf-8")})`).port;
         target = `http://localhost:${port}`;
     }
-    let routerList: any[] = [];
 
     packgeRouter(`${env.VITE_PRIVATE_RES_DIR}/router.json`);
     return {
@@ -79,6 +78,7 @@ export default defineConfig(({ mode }) => {
             vueJsx(),
             //@ts-ignore
             vueDevTools(),
+            //打包路由
             {
                 name: "custom-hooks",
                 handleHotUpdate({ file }) {

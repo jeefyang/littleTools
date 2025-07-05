@@ -1,20 +1,22 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
-import layout from './views/common/layout.vue'
-import { RouterInit } from './router/routerInit'
+import { useRouterStore } from './stores/routerStore'
+// theme
+import { darkTheme } from 'naive-ui'
+
 const router = useRouter()
+const routerStore = useRouterStore()
 
 const msg = ref('')
 
 onMounted(async () => {
-  console.log(import.meta.env.VITE_NODE_ENV)
+  console.log(import.meta.env.VITE_NODE_ENV, darkTheme)
   const data = await fetch('/api/test').then((res) => res.json())
   msg.value = data.msg
   console.log(import.meta.env.VITE_TOKEN)
 
-  await RouterInit.init(router)
+  await routerStore.init(router)
 })
 </script>
 
@@ -31,8 +33,10 @@ onMounted(async () => {
       </nav>
     </div>
   </header> -->
-
-  <RouterView />
+  <n-config-provider :theme="darkTheme" :theme-overrides="{ common: { fontWeightStrong: '600' } }">
+    <RouterView />
+    <n-global-style />
+  </n-config-provider>
 </template>
 
 <style scoped>
