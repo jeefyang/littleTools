@@ -1,38 +1,20 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { RouterLink, RouterView, useRouter } from 'vue-router'
+import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
 import { useRouterStore } from './stores/routerStore'
 // theme
 import { darkTheme } from 'naive-ui'
 
 const router = useRouter()
+const route = useRoute()
 const routerStore = useRouterStore()
 
-const msg = ref('')
-
 onMounted(async () => {
-  console.log(import.meta.env.VITE_NODE_ENV, darkTheme)
-  const data = await fetch('/api/test').then((res) => res.json())
-  msg.value = data.msg
-  console.log(import.meta.env.VITE_TOKEN)
-
   await routerStore.init(router)
 })
 </script>
 
 <template>
-  <!-- <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld :msg="msg" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header> -->
   <n-config-provider :theme="darkTheme" :theme-overrides="{ common: { fontWeightStrong: '600' } }">
     <RouterView />
     <n-global-style />

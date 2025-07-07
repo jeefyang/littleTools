@@ -20,12 +20,15 @@ import {
     NIcon,
     NModal,
     NButton,
+    NFlex,
+    NDropdown
 } from "naive-ui";
 
 const app = createApp(App);
 
 app.use(createPinia());
 app.use(router);
+
 
 app.use(create({
     components: [
@@ -36,7 +39,9 @@ app.use(create({
         NFloatButton,
         NIcon,
         NModal,
-        NButton
+        NButton,
+        NFlex,
+        NDropdown
     ]
 }));
 

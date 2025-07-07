@@ -12,7 +12,7 @@
     @dblclick="dblclickBtn"
   >
     <n-icon style="user-select: none" :size="floatW / 1.5">
-      <img src="@/assets/navigation.svg" alt="" />
+      <Navigation></Navigation>
     </n-icon>
     <div class="over"></div>
   </n-float-button>
@@ -21,6 +21,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import RouterModal from './RouterModal.vue'
+import Navigation from '@/assets/navigation.svg'
 
 let bodyDiv: HTMLDivElement | undefined = undefined
 

@@ -18,5 +18,17 @@ const router = createRouter({
     ],
 });
 
+router.addRoute('/', {
+    path: "/home/index",
+    name: "/home/index",
+    component: () => import('../views/home/index.vue')
+});
+
+router.addRoute('/', {
+    path: "/test/index",
+    name: "/test/index",
+    component: () => import('../views/test/index.vue')
+});
+
 
 export default router;

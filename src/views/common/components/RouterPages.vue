@@ -1,13 +1,13 @@
 <template>
   <n-tabs
-    v-model:value="curPage"
+    v-model:value="routerStore.curPage"
     :closable="true"
     type="card"
     @close="closePageFn"
     @update:value="changePageFn"
   >
     <n-tab-pane
-      v-for="(item, index) in pageList"
+      v-for="(item, index) in routerStore.pageList"
       :key="item.path"
       :name="item.path"
       :closable="index != 0"
@@ -16,58 +16,126 @@
         <div>{{ item.title }}</div>
       </template>
     </n-tab-pane>
+    <template #suffix>
+      <n-dropdown placement="bottom-end" trigger="click" :options="menuList" @select="menuSelectFn">
+        <n-button>
+          <n-icon><ThreePoints></ThreePoints></n-icon>
+        </n-button>
+      </n-dropdown>
+    </template>
   </n-tabs>
 </template>
 
 <script setup lang="ts">
 import { useRouterStore } from '@/stores/routerStore'
-import { ref, watch, type Ref } from 'vue'
+import { onMounted, ref, watch, type Ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import ThreePoints from '@/assets/threePoints.svg'
 
 const route = useRoute()
 const router = useRouter()
 const routerStore = useRouterStore()
-const curPage = ref(route.path)
 
-const pageList: Ref<{ title: string; path: string }[]> = ref(
-  JSON.parse(
-    sessionStorage.getItem('pages') || JSON.stringify([{ title: '首页', path: '/home/index' }]),
-  ),
-)
-const changePageFn = (e: string | number) => {
-  const index = pageList.value.findIndex((c) => c.path == e)
-  if (index == -1) {
-    return
+const menuList: { key: string; label: string }[] = [
+  { key: 'close', label: '关闭' },
+  { key: 'closeRight', label: '关闭右边' },
+  { key: 'closeLeft', label: '关闭左边' },
+  { key: 'closeAll', label: '关闭全部' },
+  { key: 'closeOther', label: '关闭其他' },
+]
+
+const menuSelectFn = (e: string) => {
+  switch (e) {
+    case 'close':
+      var index = routerStore.pageList.findIndex((c) => c.path == routerStore.curPage)
+      if (index >= 1) {
+        router.push({
+          path: routerStore.pageList[index - 1].path,
+          query: routerStore.pageList[index - 1].query,
+        })
+        routerStore.pageList.splice(index, 1)
+      }
+      break
+    case 'closeRight':
+      var index = routerStore.pageList.findIndex((c) => c.path == routerStore.curPage)
+      if (index != -1) {
+        routerStore.pageList.splice(index + 1, routerStore.pageList.length)
+        routerStore.pageList = routerStore.pageList.slice(0, index + 1)
+      }
+      break
+    case 'closeLeft':
+      var index = routerStore.pageList.findIndex((c) => c.path == routerStore.curPage)
+      if (index != -1) {
+        routerStore.pageList = [routerStore.pageList[0], ...routerStore.pageList.slice(index)]
+      }
+      break
+    case 'closeAll':
+      router.push({ path: routerStore.pageList[0].path, query: routerStore.pageList[0].query })
+      routerStore.pageList = [routerStore.pageList[0]]
+      break
+    case 'closeOther':
+      var index = routerStore.pageList.findIndex((c) => c.path == routerStore.curPage)
+      if (index != -1) {
+        routerStore.pageList = [routerStore.pageList[0], routerStore.pageList[1]]
+      }
+      break
   }
-  router.push({ path: pageList.value[index].path })
+  routerStore.changePageListCount++
+  routerStore.savePages()
 }
 
-const closePageFn = (e: string | number) => {
-  const index = pageList.value.findIndex((c) => c.path == e)
+/** 改变选中的页面 */
+const changePageFn = (e: string | number) => {
+  console.log('change')
+  const index = routerStore.pageList.findIndex((c) => c.path == e)
   if (index == -1) {
     return
   }
-  const prev = pageList.value[index - 1]
-  router.push({ path: prev.path })
-  pageList.value.splice(index, 1)
-  sessionStorage.setItem('pages', JSON.stringify(pageList.value))
+  router.push({
+    path: routerStore.pageList[index].path,
+    query: routerStore.pageList[index].query || {},
+  })
+}
+
+/** 关闭页面 */
+const closePageFn = (e: string | number) => {
+  const index = routerStore.pageList.findIndex((c) => c.path == e)
+  if (index == -1) {
+    return
+  }
+  const prev = routerStore.pageList[index - 1]
+  router.push({ path: prev.path, query: prev.query || {} })
+  routerStore.pageList.splice(index, 1)
+  routerStore.savePages()
+  routerStore.changePageListCount++
 }
 
 watch(
-  () => route.path,
+  () => route.fullPath,
   (v) => {
-    curPage.value = v
-
-    const index = pageList.value.findIndex((c) => c.path == v)
-    // 已经存在
-    if (index != -1) {
+    routerStore.changePageListCount++
+    if (routerStore.pageList.length == 0) {
+      routerStore.pageList = routerStore.loadPages()
+    }
+    const data = routerStore.routerList.find((c) => '/' + c.router == route.path)
+    if (!data) {
       return
     }
-    const data = routerStore.routerList.find((c) => '/' + c.router == v)
-    if (data) {
-      pageList.value.push({ title: data.title, path: v })
-      sessionStorage.setItem('pages', JSON.stringify(pageList.value))
+    const p = data.isMulti ? `${route.path}?t=${route.query['t']}` : route.path
+    routerStore.curPage = p
+    const index = routerStore.pageList.findIndex((c) => c.path == p)
+    // 已经存在
+    if (index != -1) {
+      routerStore.pageList[index].fullPath = v
+      return
     }
+    routerStore.pageList.push({
+      title: data.title,
+      path: p,
+      query: <any>route.query || {},
+      fullPath: v,
+    })
+    routerStore.savePages()
   },
   { immediate: true },
 )

@@ -32,7 +32,11 @@ const routerList = computed(() => {
 })
 
 const toUrl = (item: (typeof routerStore.routerList)[number]) => {
-  router.push({ path: '/' + item.router })
+  if (item.isMulti == '1') {
+    router.push({ path: '/' + item.router, query: { t: new Date().getTime() } })
+  } else {
+    router.push({ path: '/' + item.router })
+  }
   modelShow.value = false
 }
 </script>

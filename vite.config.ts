@@ -6,6 +6,7 @@ import vueJsx from '@vitejs/plugin-vue-jsx';
 import vueDevTools from 'vite-plugin-vue-devtools';
 import fs from 'node:fs';
 import path from 'node:path';
+import svgLoader from 'vite-svg-loader';
 
 const loopDir = (dir: string, arr: string[] = []) => {
     const list = fs.readdirSync(dir);
@@ -33,7 +34,7 @@ const packgeRouter = (savePath: string, file?: string) => {
             continue;
         }
         const str = fs.readFileSync(c, 'utf-8');
-        const keyList = ['title'];
+        const keyList = ['title', 'isMulti'];
         const data: any = keyList.map((k) => {
             return str.match(new RegExp(`<!-- \\$${k}:(.*?) -->`))?.[1];
         }).reduce((a, c, i) => {
@@ -78,6 +79,7 @@ export default defineConfig(({ mode }) => {
             vueJsx(),
             //@ts-ignore
             vueDevTools(),
+            svgLoader(),
             //打包路由
             {
                 name: "custom-hooks",
