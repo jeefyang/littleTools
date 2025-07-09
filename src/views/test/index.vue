@@ -2,6 +2,8 @@
   <!-- $title:测试 -->
   <!-- $isMulti:0 -->
   <!-- $isRenew:1 -->
+  <!-- $isMenu:1 -->
+
   <div>test1</div>
   <input />
 </template>

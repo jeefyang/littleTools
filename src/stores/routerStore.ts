@@ -13,6 +13,8 @@ export const useRouterStore = defineStore('router', () => {
         isMulti: string;
         /** 是否重载 */
         isRenew: string;
+        /** 是否在菜单显示 */
+        isMenu: string;
         removeFn?: () => any;
     }[]>[]);
     /** 页面组件列表 */

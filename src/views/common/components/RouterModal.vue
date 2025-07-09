@@ -28,7 +28,7 @@ const modelShow = computed({
 })
 
 const routerList = computed(() => {
-  return routerStore.routerList
+  return routerStore.routerList.filter((c) => c.isMenu)
 })
 
 const toUrl = (item: (typeof routerStore.routerList)[number]) => {
