@@ -1,3 +1,4 @@
+import { useRouterStore } from '@/stores/routerStore';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
@@ -18,16 +19,15 @@ const router = createRouter({
     ],
 });
 
-router.addRoute('/', {
-    path: "/home/index",
-    name: "/home/index",
-    component: () => import('../views/home/index.vue')
-});
-
-router.addRoute('/', {
-    path: "/test/index",
-    name: "/test/index",
-    component: () => import('../views/test/index.vue')
+let isInit = false;
+router.beforeEach(async (to, from, next) => {
+    if (!isInit) {
+        isInit = true;
+        const routeStore = useRouterStore();
+        await routeStore.init(router);
+        router.push(to.fullPath);
+    }
+    next(true);
 });
 
 

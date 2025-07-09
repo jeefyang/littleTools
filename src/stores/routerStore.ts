@@ -83,7 +83,8 @@ export const useRouterStore = defineStore('router', () => {
             list.push({ ...item, removeFn: a });
         }
         routerList.value = list;
-        // await router.push('');
+        // console.log(router.currentRoute.value);
+        // await router.push("");
     };
 
     const getPath = (route: RouteLocationNormalizedLoadedGeneric) => {

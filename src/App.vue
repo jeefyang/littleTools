@@ -1,17 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
-import { useRouterStore } from './stores/routerStore'
+import { RouterView } from 'vue-router'
 // theme
 import { darkTheme } from 'naive-ui'
 
-const router = useRouter()
-const route = useRoute()
-const routerStore = useRouterStore()
-
-onMounted(async () => {
-  await routerStore.init(router)
-})
+onMounted(async () => {})
 </script>
 
 <template>
