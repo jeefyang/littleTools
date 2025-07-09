@@ -6,44 +6,19 @@ import { createPinia } from 'pinia';
 import 'vfonts/Lato.css';
 // 等宽字体
 import 'vfonts/FiraCode.css';
+import 'virtual:uno.css';
 
 
 
 import App from './App.vue';
 import router from './router';
-import {
-    create,
-    NTabs,
-    NTabPane,
-    NGlobalStyle,
-    NConfigProvider,
-    NFloatButton,
-    NIcon,
-    NModal,
-    NButton,
-    NFlex,
-    NDropdown
-} from "naive-ui";
+
 
 const app = createApp(App);
 
 app.use(createPinia());
 app.use(router);
 
-app.use(create({
-    components: [
-        NTabPane,
-        NTabs,
-        NGlobalStyle,
-        NConfigProvider,
-        NFloatButton,
-        NIcon,
-        NModal,
-        NButton,
-        NFlex,
-        NDropdown
-    ]
-}));
 
 
 app.mount('#app');

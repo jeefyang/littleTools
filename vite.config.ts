@@ -9,7 +9,10 @@ import path from 'node:path';
 import svgLoader from 'vite-svg-loader';
 import autoRouterList from './plugins/auto-router-list';
 import keepAlivePlus from './plugins/keep-alive-plus';
-
+import AutoImport from 'unplugin-auto-import/vite';
+import { NaiveUiResolver } from 'unplugin-vue-components/resolvers';
+import Components from 'unplugin-vue-components/vite';
+import UnoCSS from 'unocss/vite';
 
 // https://vite.dev/config/
 // @ts-ignore
@@ -39,8 +42,27 @@ export default defineConfig(({ mode }) => {
             //打包路由
             autoRouterList({ env: env }),
             // 加强keepAlive
-            keepAlivePlus()
+            keepAlivePlus(),
+            UnoCSS('./unocss.config.ts'),
+            // 自动导入
+            AutoImport({
+                imports: [
+                    'vue',
+                    {
+                        'naive-ui': [
+                            'useDialog',
+                            'useMessage',
+                            'useNotification',
+                            'useLoadingBar'
+                        ]
+                    }
+                ]
+            }),
+            Components({
+                resolvers: [NaiveUiResolver()],
+            })
         ],
+
         // 仅开发使用
         server: {
             proxy: {
