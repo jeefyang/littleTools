@@ -6,7 +6,7 @@
     <div class="main">
       <RouterView v-slot="{ Component, route }">
         <keep-alive :initCacheKeyList="initCacheKeyList">
-          <component :is="Component" :key="route.fullPath"></component>
+          <component :is="Component" :key="`${route.path}?t=${route.query['t']}`"></component>
         </keep-alive>
       </RouterView>
     </div>
@@ -37,8 +37,8 @@ const routerStore = useRouterStore()
 watch(
   () => routerStore.changePageListCount,
   (_v) => {
-    console.log(routerStore.pageList.map((c) => c.path))
-    initCacheKeyList.value = routerStore.pageList.map((c) => c.path)
+    console.log(routerStore.pageList.map((c) => c.cachedPath))
+    initCacheKeyList.value = routerStore.pageList.map((c) => c.cachedPath!)
   },
 )
 onMounted(() => {})

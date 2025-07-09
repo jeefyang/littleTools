@@ -32,7 +32,7 @@ const routerList = computed(() => {
 })
 
 const toUrl = (item: (typeof routerStore.routerList)[number]) => {
-  if (item.isMulti == '1') {
+  if (item.isMulti == '1' || item.isRenew == '1') {
     router.push({ path: '/' + item.router, query: { t: new Date().getTime() } })
   } else {
     router.push({ path: '/' + item.router })

@@ -11,6 +11,8 @@ export const useRouterStore = defineStore('router', () => {
         router: string;
         /** 是否多开 */
         isMulti: string;
+        /** 是否重载 */
+        isRenew: string;
         removeFn?: () => any;
     }[]>[]);
     /** 页面组件列表 */
@@ -24,6 +26,7 @@ export const useRouterStore = defineStore('router', () => {
         query: Record<string, string | number>;
         isMulti?: boolean;
         fullPath?: string;
+        cachedPath?: string;
     }[]>[]);
     /** 当前页面 */
     const curPage = ref('');
@@ -32,8 +35,10 @@ export const useRouterStore = defineStore('router', () => {
 
     /** 读取页面标签 */
     const loadPages = (): typeof pageList.value => {
+        const firstQuery: Record<string, string> = {};
+        const firstPath = `/home/index`;
         return [
-            { title: '首页', path: '/home/index?t=123', isMulti: true, query: { t: 123 } },
+            { title: '首页', path: firstPath, isMulti: true, query: firstQuery, cachedPath: `${firstPath}?t=${firstQuery['t']}` },
             ...JSON.parse(sessionStorage.getItem(sessionPagesKey) || '[]'),
         ];
     };

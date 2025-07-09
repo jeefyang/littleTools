@@ -8,8 +8,8 @@
   >
     <n-tab-pane
       v-for="(item, index) in routerStore.pageList"
-      :key="item.path"
-      :name="item.path"
+      :key="item.cachedPath"
+      :name="item.cachedPath!"
       :closable="index != 0"
     >
       <template #tab>
@@ -87,7 +87,7 @@ const menuSelectFn = (e: string) => {
 /** 改变选中的页面 */
 const changePageFn = (e: string | number) => {
   console.log('change')
-  const index = routerStore.pageList.findIndex((c) => c.path == e)
+  const index = routerStore.pageList.findIndex((c) => c.cachedPath == e)
   if (index == -1) {
     return
   }
@@ -99,7 +99,8 @@ const changePageFn = (e: string | number) => {
 
 /** 关闭页面 */
 const closePageFn = (e: string | number) => {
-  const index = routerStore.pageList.findIndex((c) => c.path == e)
+  const p = e.toString().split('?')[0]
+  const index = routerStore.pageList.findIndex((c) => c.path == p)
   if (index == -1) {
     return
   }
@@ -111,30 +112,38 @@ const closePageFn = (e: string | number) => {
 }
 
 watch(
-  () => route.fullPath,
-  (v) => {
+  () => [route.path, route.fullPath, route.query],
+  ([path, fullPath, query]) => {
+    console.log('router change', path, fullPath, query)
     routerStore.changePageListCount++
     if (routerStore.pageList.length == 0) {
       routerStore.pageList = routerStore.loadPages()
     }
-    const data = routerStore.routerList.find((c) => '/' + c.router == route.path)
+    const data = routerStore.routerList.find((c) => '/' + c.router == path)
+    // 没有找到路由
     if (!data) {
       return
     }
-    const p = data.isMulti ? `${route.path}?t=${route.query['t']}` : route.path
-    routerStore.curPage = p
-    const index = routerStore.pageList.findIndex((c) => c.path == p)
+    const cachedPath = `${path}?t=${(query as { t: string })['t']}`
+    routerStore.curPage = cachedPath
+    const index = routerStore.pageList.findIndex((c) => c.cachedPath == cachedPath)
     // 已经存在
     if (index != -1) {
-      routerStore.pageList[index].fullPath = v
+      routerStore.pageList[index].fullPath = fullPath as string
       return
     }
-    routerStore.pageList.push({
+    const newItem: (typeof routerStore.pageList)[number] = {
       title: data.title,
-      path: p,
+      path: path as string,
       query: <any>route.query || {},
-      fullPath: v,
-    })
+      fullPath: fullPath as string,
+      cachedPath: cachedPath,
+    }
+    if (data.isRenew && routerStore.pageList.findIndex((c) => c.path == path) >= 0) {
+      routerStore.pageList[routerStore.pageList.findIndex((c) => c.path == path)] = newItem
+    } else {
+      routerStore.pageList.push(newItem)
+    }
     routerStore.savePages()
   },
   { immediate: true },

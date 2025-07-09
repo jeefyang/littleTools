@@ -1,6 +1,6 @@
 <template>
   <!-- $title:home -->
-  <!-- $isMulti:1 -->
+  <!-- $isMulti:0 -->
   <div>222221322HelloWorld!!!!</div>
   <input />
   <button @click="tester.start()">性能</button>
