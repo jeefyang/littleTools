@@ -41,10 +41,13 @@ export default function keepAlivePlus(options: PluginOptions = {}): Plugin {
                     }
                 }
                 let target = arr[1].slice(start, end);
-                target = target.replace(/props:\s*{/, `
-                    props: {
+                const propsStr = target.match(/(\n\s*props:\s*{)/);
+                if (propsStr && propsStr[0]) {
+                    target = target.replace(propsStr[0], `
+                    ${propsStr[0]}
                     initCacheKeyList:[Array],
                     `);
+                }
                 const watchStr = target.match(/(\n\s*watch.*\()/);
                 if (watchStr && watchStr[0]) {
                     target = target.replace(watchStr[0], `

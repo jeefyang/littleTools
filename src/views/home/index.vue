@@ -1,6 +1,6 @@
 <template>
   <!-- $title:home -->
-  <!-- $isMulti:0 -->
+  <!-- $isMulti:1 -->
   <div>222221322HelloWorld!!!!</div>
   <input />
   <button @click="tester.start()">性能</button>
@@ -49,6 +49,7 @@ class ResourceTester {
 }
 
 onUnmounted(() => {
+  tester.stop()
   console.log('组件销毁')
 })
 

@@ -99,8 +99,7 @@ const changePageFn = (e: string | number) => {
 
 /** 关闭页面 */
 const closePageFn = (e: string | number) => {
-  const p = e.toString().split('?')[0]
-  const index = routerStore.pageList.findIndex((c) => c.path == p)
+  const index = routerStore.pageList.findIndex((c) => c.cachedPath == e)
   if (index == -1) {
     return
   }
