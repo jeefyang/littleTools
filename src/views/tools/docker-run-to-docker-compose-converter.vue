@@ -52,15 +52,12 @@ const { download } = useDownloadFileFromBase64({
     />
     <n-divider />
     <TextareaCopyable :value="dockerCompose" language="yaml" style="width: 90%" />
+    <n-button :disabled="dockerCompose === ''" secondary @click="download">
+      Download docker-compose.yml
+    </n-button>
   </n-flex>
 
   <div>
-    <div mt-5 flex justify-center>
-      <c-button :disabled="dockerCompose === ''" secondary @click="download">
-        Download docker-compose.yml
-      </c-button>
-    </div>
-
     <div v-if="notComposable.length > 0">
       <n-alert title="This options are not translatable to docker-compose" type="info" mt-5>
         <ul>

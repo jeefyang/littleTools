@@ -23,7 +23,7 @@ const props = withDefaults(
     followHeightOf: null,
     language: 'txt',
     copyPlacement: 'top-right',
-    copyMessage: 'Copy to clipboard',
+    copyMessage: '点击复制',
   },
 )
 hljs.registerLanguage('sql', sqlHljs)
@@ -43,7 +43,7 @@ const tooltipText = computed(() => (isJustCopied.value ? '已复制!' : copyMess
 
 <template>
   <div style="overflow-x: hidden; width: 100%">
-    <n-card relative round>
+    <n-card class="relative" round>
       <n-scrollbar
         x-scrollable
         trigger="none"
@@ -57,7 +57,7 @@ const tooltipText = computed(() => (isJustCopied.value ? '已复制!' : copyMess
           <n-code :code="value" :language="language" :trim="false" data-test-id="area-content" />
         </n-config-provider>
       </n-scrollbar>
-      <div absolute right-10px top-10px>
+      <div class="absolute right-10px top-10px">
         <n-tooltip v-if="value" :tooltip="tooltipText" placement="right">
           <template #trigger>
             <n-button circle important:h-10 important:w-10 @click="copy()">

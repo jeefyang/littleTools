@@ -3,11 +3,12 @@
 import { createApp, getCurrentInstance } from 'vue';
 import { createPinia } from 'pinia';
 // 通用字体
-import 'vfonts/Lato.css';
+// import 'vfonts/Lato.css';
 // 等宽字体
 import 'vfonts/FiraCode.css';
 import 'virtual:uno.css';
-
+import './styles/index.scss';
+import 'default-passive-events';
 
 
 import App from './App.vue';

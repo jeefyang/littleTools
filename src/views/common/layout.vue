@@ -37,7 +37,6 @@ const routerStore = useRouterStore()
 watch(
   () => routerStore.changePageListCount,
   (_v) => {
-    console.log(routerStore.pageList.map((c) => c.cachedPath))
     initCacheKeyList.value = routerStore.pageList.map((c) => c.cachedPath!)
   },
 )

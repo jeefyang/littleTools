@@ -113,7 +113,6 @@ const closePageFn = (e: string | number) => {
 watch(
   () => [route.path, route.fullPath, route.query],
   ([path, fullPath, query]) => {
-    console.log('router change', path, fullPath, query)
     routerStore.changePageListCount++
     if (routerStore.pageList.length == 0) {
       routerStore.pageList = routerStore.loadPages()
