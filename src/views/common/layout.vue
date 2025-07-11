@@ -1,15 +1,18 @@
 <template>
   <div id="layout" class="body">
-    <!-- 标签栏 -->
-    <RouterPages></RouterPages>
-    <!-- 主体 -->
-    <div class="main">
-      <RouterView v-slot="{ Component, route }">
-        <keep-alive :initCacheKeyList="initCacheKeyList">
-          <component :is="Component" :key="`${route.path}?t=${route.query['t']}`"></component>
-        </keep-alive>
-      </RouterView>
+    <div class="flex flex-col" style="width: 100%; height: 100%">
+      <!-- 标签栏 -->
+      <RouterPages></RouterPages>
+      <!-- 主体 -->
+      <div class="main">
+        <RouterView v-slot="{ Component, route }">
+          <keep-alive :initCacheKeyList="initCacheKeyList">
+            <component :is="Component" :key="`${route.path}?t=${route.query['t']}`"></component>
+          </keep-alive>
+        </RouterView>
+      </div>
     </div>
+
     <!-- 悬浮按钮  -->
     <FloatBtn></FloatBtn>
   </div>
@@ -47,5 +50,11 @@ onMounted(() => {})
   width: calc(100vw - 20px);
   height: calc(100vh - 20px);
   margin: 10px;
+  overflow: hidden;
+}
+
+.main {
+  flex: 1;
+  overflow: auto;
 }
 </style>

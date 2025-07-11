@@ -126,6 +126,8 @@ const cronValidationRules = [
           placeholder="* * * * *"
           class="mb-3"
           :valids="cronValidationRules"
+          size="large"
+          style="text-align: center"
         ></j-input>
       </div>
 
