@@ -10,10 +10,18 @@
 </template>
 <script setup lang="ts">
 import DragFile from '@/components/DragFile.vue'
-type JRenameFile={}
+import { type JFile } from '@/components/DragFile.vue'
+
+type JRenameFile = {
+  originName: string
+  renameList: {
+    type: string
+    name: string
+  }
+}
 
 const onFilesChangeFn = (op: {
-  fileList: { fullPath: string; f: File }[]
+  fileList: JFile[]
   type: 'drag' | 'select'
   event: Event | DragEvent
 }) => {

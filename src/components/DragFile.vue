@@ -24,9 +24,7 @@ import { ref } from 'vue'
 import { useThemeVars } from 'naive-ui'
 
 const themeVars = useThemeVars()
-console.log(themeVars.value)
-
-type JFile = {
+export type JFile = {
   fullPath: string
   f: File
 }
