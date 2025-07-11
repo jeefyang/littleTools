@@ -1,7 +1,7 @@
 <template>
   <div>
     <n-input v-bind="props" :status="status[0]"></n-input>
-    <div v-if="valids && status[0] == 'error'" class="c-red">
+    <div v-if="valids && status[0] == 'error'" :style="{ color: themeVars.errorColor }">
       {{ status[1] }}
     </div>
   </div>
@@ -12,6 +12,9 @@ import { NInput, type FormValidationStatus } from 'naive-ui'
 
 import { computed, ref, useAttrs } from 'vue'
 import { Component2Props } from '@/utils/vueTools'
+import { useThemeVars } from 'naive-ui'
+
+const themeVars = useThemeVars()
 
 const props = defineProps(
   assign(Component2Props(NInput), {

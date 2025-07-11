@@ -124,6 +124,7 @@ watch(
     }
     const cachedPath = `${path}?t=${(query as { t: string })['t']}`
     routerStore.curPage = cachedPath
+    document.title = data.title
     const index = routerStore.pageList.findIndex((c) => c.cachedPath == cachedPath)
     // 已经存在
     if (index != -1) {
