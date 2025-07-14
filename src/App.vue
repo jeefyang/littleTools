@@ -10,7 +10,7 @@ onMounted(async () => {})
 <template>
   <n-config-provider :theme="darkTheme" :theme-overrides="{ common: { fontWeightStrong: '600' } }">
     <n-global-style />
-    <NMessageProvider placement="bottom">
+    <NMessageProvider placement="top">
       <NNotificationProvider placement="bottom-right">
         <RouterView />
       </NNotificationProvider>

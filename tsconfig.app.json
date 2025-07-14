@@ -9,6 +9,8 @@
         "src/**/__tests__/*"
     ],
     "compilerOptions": {
+        "jsx": "preserve",
+        "jsxImportSource": "vue",
         "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
         "types": [
             "naive-ui/volar"

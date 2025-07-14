@@ -40,7 +40,7 @@ export default function autoRouterList(options: PluginOptions): Plugin {
             const str = fs.readFileSync(c, 'utf-8');
             const keyList = ['title', 'isMulti', 'isRenew', 'isMenu'];
             const data: any = keyList.map((k) => {
-                return str.match(new RegExp(`<!-- \\$${k}:(.*?) -->`))?.[1];
+                return str.match(new RegExp(`<!--\\s*\\$${k}:(.*?)\\s*-->`))?.[1];
             }).reduce((a, c, i) => {
                 // @ts-ignore
                 a[keyList[i]] = c;

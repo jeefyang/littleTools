@@ -5,7 +5,7 @@
     @dragleave.prevent="handleDragLeave"
     @drop.prevent="handleDrop"
   >
-    <slot name="content" :triggerFileInput="triggerFileInput">
+    <slot name="content" :triggerFileInput="triggerFileInput" :isDragActive="isDragActive">
       <div
         class="drop-zone"
         :style="{ 'border-color': isDragActive ? themeVars.primaryColor : themeVars.textColorBase }"
@@ -26,6 +26,7 @@ import { useThemeVars } from 'naive-ui'
 const themeVars = useThemeVars()
 export type JFile = {
   fullPath: string
+  dir: string
   f: File
 }
 
@@ -33,7 +34,7 @@ const isDragActive = ref(false)
 const emits = defineEmits<{
   filesChange: [
     {
-      fileList: { fullPath: string; f: File }[]
+      fileList: JFile[]
       type: 'drag' | 'select'
       event: Event | DragEvent
     },
@@ -42,7 +43,7 @@ const emits = defineEmits<{
 
 const props = defineProps({
   /** 是否允许选择文件夹(只影响点击文件选择框时) */
-  haveDirectory: {
+  webkitdirectory: {
     type: Boolean,
     default: true,
   },
@@ -112,7 +113,7 @@ const loopFile = async (entry: FileSystemEntry, dir: string, list: JFile[]) => {
         resolve(file)
       })
     })
-    list.push({ fullPath: `${dir}${file.name}`, f: file })
+    list.push({ fullPath: `${dir}${file.name}`, f: file, dir: dir })
   }
   return list
 }
@@ -122,12 +123,16 @@ const triggerFileInput = () => {
   const input = document.createElement('input')
   input.type = 'file'
   input.multiple = props.multiple
-  input.webkitdirectory = props.haveDirectory
+  input.webkitdirectory = props.webkitdirectory
   input.onchange = (e) => {
     const files: FileList = (<any>e.target).files
     const list: JFile[] = []
     for (let i = 0; i < files.length; i++) {
-      list.push({ fullPath: files[i].webkitRelativePath! || files[i].name, f: files[i] })
+      list.push({
+        fullPath: files[i].webkitRelativePath! || files[i].name,
+        f: files[i],
+        dir: (files[i].webkitRelativePath! || '.').split('/').slice(0, -1).join('/'),
+      })
     }
     emits('filesChange', {
       type: 'select',
