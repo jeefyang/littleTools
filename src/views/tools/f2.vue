@@ -205,7 +205,7 @@ const regexp_replace = ref('')
 const regexp_isGlobal = ref(true)
 const regexp_isIgnoreCase = ref(true)
 const fn_base_val = [
-  `(f,t,fullFile)=>{`,
+  `(f,t,index,fullFile,fileList)=>{`,
   `
  // 开始你的表演
 
@@ -291,10 +291,10 @@ const applyFn = () => {
         ${fn_value.value}
         ${fn_base_val[2]}
         `
-        fileList.value.forEach((c) => {
+        fileList.value.forEach((c, i) => {
           const prev = c[getCountKey(renameKeyCount.value)]
           const data = getFn_variables(c)
-          const newName = eval(`(${fnStr})`)(data.f, data.t, data.fullFile)
+          const newName = eval(`(${fnStr})`)(data.f, data.t, i, data.fullFile, fileList.value)
           console.log(newName)
           const n: JRenameBase = {
             baseName: newName.split('.').slice(0, -1).join('.'),
@@ -463,6 +463,8 @@ const getFn_variables = (file: JRenameFile) => {
       m,
       s,
     },
+    index: 0,
+    fileList: fileList.value,
   }
 }
 
