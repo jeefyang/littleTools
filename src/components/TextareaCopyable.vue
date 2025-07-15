@@ -2,14 +2,9 @@
 import { Copy } from '@vicons/tabler'
 import { useElementSize } from '@vueuse/core'
 import hljs from 'highlight.js/lib/core'
-import jsonHljs from 'highlight.js/lib/languages/json'
-import sqlHljs from 'highlight.js/lib/languages/sql'
-import xmlHljs from 'highlight.js/lib/languages/xml'
-import yamlHljs from 'highlight.js/lib/languages/yaml'
-import iniHljs from 'highlight.js/lib/languages/ini'
-import markdownHljs from 'highlight.js/lib/languages/markdown'
+import yaml from 'highlight.js/lib/languages/yaml'
 import { useCopy } from '@/composable/copy'
-import { withDefaults, ref, computed, toRefs } from 'vue'
+import { withDefaults, ref, computed, toRefs, watch } from 'vue'
 
 const props = withDefaults(
   defineProps<{
@@ -26,13 +21,60 @@ const props = withDefaults(
     copyMessage: '点击复制',
   },
 )
-hljs.registerLanguage('sql', sqlHljs)
-hljs.registerLanguage('json', jsonHljs)
-hljs.registerLanguage('html', xmlHljs)
-hljs.registerLanguage('xml', xmlHljs)
-hljs.registerLanguage('yaml', yamlHljs)
-hljs.registerLanguage('toml', iniHljs)
-hljs.registerLanguage('markdown', markdownHljs)
+
+const langMap = new Map<string, boolean>()
+
+const updateKey = ref(<number>0)
+
+watch(
+  () => props.language,
+  async (l) => {
+    if (langMap.has(l)) {
+      return
+    }
+    langMap.set(l, true)
+    console.log(yaml, l)
+    switch (l) {
+      case 'js':
+        var m = await import('highlight.js/lib/languages/javascript')
+        hljs.registerLanguage(l, m.default)
+        break
+      case 'sql':
+        var m = await import('highlight.js/lib/languages/markdown')
+        hljs.registerLanguage(l, m.default)
+        break
+      case 'json':
+        var m = await import('highlight.js/lib/languages/json')
+        hljs.registerLanguage(l, m.default)
+        break
+      case 'html':
+        var m = await import('highlight.js/lib/languages/xml')
+        hljs.registerLanguage(l, m.default)
+        break
+      case 'xml':
+        var m = await import('highlight.js/lib/languages/xml')
+        hljs.registerLanguage(l, m.default)
+        break
+      case 'yaml':
+        var m = await import('highlight.js/lib/languages/yaml')
+        hljs.registerLanguage(l, m.default)
+        break
+      case 'toml':
+        var m = await import('highlight.js/lib/languages/ini')
+        hljs.registerLanguage(l, m.default)
+        break
+      case 'markdown':
+        var m = await import('highlight.js/lib/languages/markdown')
+        hljs.registerLanguage(l, m.default)
+        break
+      default:
+        console.warn(`没有找到对应的语言:${l}，请自行注册`)
+        break
+    }
+    updateKey.value++
+  },
+  { immediate: true },
+)
 
 const { value, language, followHeightOf, copyPlacement, copyMessage } = toRefs(props)
 const { height } = followHeightOf.value ? useElementSize(followHeightOf) : { height: ref(null) }
@@ -53,7 +95,7 @@ const tooltipText = computed(() => (isJustCopied.value ? '已复制!' : copyMess
             : ''
         "
       >
-        <n-config-provider :hljs="hljs">
+        <n-config-provider :hljs="hljs" :key="updateKey">
           <n-code :code="value" :language="language" :trim="false" data-test-id="area-content" />
         </n-config-provider>
       </n-scrollbar>

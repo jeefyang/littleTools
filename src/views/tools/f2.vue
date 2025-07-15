@@ -24,7 +24,7 @@
             :data="fileList"
             :pagination="paginationReactive"
             style="overflow: auto; width: 100%"
-            :scroll-x="(renameKeyCount + 1) * 400 + 1500"
+            :scroll-x="(renameKeyCount + 1) * previewWidth + 1500"
           >
           </n-data-table>
         </n-card>
@@ -49,7 +49,7 @@
             搜索:
             <n-input style="width: 300px" placeholder="请输入正则" v-model:value="regexp_search" />
           </div>
-          <div>
+          <div class="mb-5">
             替换:
             <n-input
               style="width: 300px"
@@ -57,6 +57,21 @@
               v-model:value="regexp_replace"
             />
           </div>
+          <n-space item-style="display: flex;" align="center" class="mb-5">
+            <n-checkbox label="全局" v-model:checked="regexp_isGlobal" />
+            <n-checkbox label="忽略大小写" v-model:checked="regexp_isIgnoreCase" />
+          </n-space>
+        </template>
+        <!-- 方法 -->
+        <template v-else-if="curType == 'fn'">
+          <div class="ml-2">{{ fn_base_val[0] }}</div>
+          <JCode
+            lang="js"
+            v-model:code="fn_value"
+            style="width: 80%; height: 200px"
+            :variables="fn_variables"
+          ></JCode>
+          <div class="ml-2">{{ fn_base_val[2] }}</div>
         </template>
       </div>
 
@@ -68,10 +83,11 @@
 import DragFile from '@/components/DragFile.vue'
 import { type JFile } from '@/components/DragFile.vue'
 import { useThemeVars, type DataTableColumns, NButton, NInput, NFlex, useMessage } from 'naive-ui'
-import { ref, h, reactive, onMounted } from 'vue'
+import { ref, h, reactive, onMounted, watch } from 'vue'
+import JCode from '@/components/JCode.vue'
 import dayjs from 'dayjs'
 
-type RenamePrefixed<T extends string> = `rename-${T}`
+type RenamePrefixed<T extends string> = `rename_${T}`
 type JRenameType =
   | 'origin'
   | 'input'
@@ -85,6 +101,8 @@ type JRenameType =
   | 'noChange'
 type JRenameBase = {
   name: string
+  ext: string
+  baseName: string
   count: number
   type: JRenameType
   originName: string
@@ -97,12 +115,14 @@ type JRenameFile = {
   time: number
   size: number
   modifiedTime: string
+  baseName: string
 } & {
   [K in string as RenamePrefixed<K>]: JRenameBase
 }
 
 /** 缓存 */
 const cacheMap = new Map<string, boolean>()
+const previewWidth = 350
 
 const themeVars = useThemeVars()
 
@@ -182,6 +202,22 @@ const baseColumns: DataTableColumns = [
 
 const regexp_search = ref('')
 const regexp_replace = ref('')
+const regexp_isGlobal = ref(true)
+const regexp_isIgnoreCase = ref(true)
+const fn_base_val = [
+  `(f,t,fullFile)=>{`,
+  `
+ // 开始你的表演
+
+  
+  // 结束你的表演
+  // 返回值
+  return f.name
+`,
+  '}',
+]
+const fn_value = ref(fn_base_val[1])
+const fn_variables = ref<{ [x in string]: any }>({})
 
 /** 表格字段 */
 const columns = ref<DataTableColumns>([])
@@ -211,6 +247,7 @@ const paginationReactive = reactive({
 const rebackFn = () => {
   if (renameKeyCount.value == 0) {
     message.error('退无可退了!!!')
+    return
   }
   renameKeyCount.value--
   updateColumns()
@@ -224,16 +261,22 @@ const applyFn = () => {
   }
   try {
     switch (curType.value) {
+      // 正则
       case 'regexp':
         if (!regexp_search.value) {
           message.warning('请输入正则表达式')
           return
         }
-        const reg = new RegExp(regexp_search.value)
+        const reg = new RegExp(
+          regexp_search.value,
+          `${regexp_isGlobal.value ? 'g' : ''}${regexp_isIgnoreCase.value ? 'i' : ''}`,
+        )
         fileList.value.forEach((c) => {
           const prev = c[getCountKey(renameKeyCount.value)]
           const newName = prev.name.replace(reg, regexp_replace.value)
           const n: JRenameBase = {
+            baseName: newName.split('.').slice(0, -1).join('.'),
+            ext: newName.split('.').pop() || '',
             name: newName,
             type: newName == prev.name ? 'noChange' : 'regexp',
             originName: newName,
@@ -242,6 +285,32 @@ const applyFn = () => {
           c[getCountKey(renameKeyCount.value + 1)] = n
         })
         break
+      case 'fn':
+        const fnStr = `
+        ${fn_base_val[0]}
+        ${fn_value.value}
+        ${fn_base_val[2]}
+        `
+        fileList.value.forEach((c) => {
+          const prev = c[getCountKey(renameKeyCount.value)]
+          const data = getFn_variables(c)
+          const newName = eval(`(${fnStr})`)(data.f, data.t, data.fullFile)
+          console.log(newName)
+          const n: JRenameBase = {
+            baseName: newName.split('.').slice(0, -1).join('.'),
+            ext: newName.split('.').pop() || '',
+            name: newName,
+            type: newName == prev.name ? 'noChange' : 'fn',
+            originName: newName,
+            count: renameKeyCount.value + 1,
+          }
+          c[getCountKey(renameKeyCount.value + 1)] = n
+        })
+        // return
+        break
+      default:
+        message.warning('无修改')
+        return
     }
   } catch (e) {
     message.error('修改失败')
@@ -258,7 +327,7 @@ const getCountStr = (i: number) => {
 }
 
 const getCountKey = (i: number): RenamePrefixed<string> => {
-  return `rename-${getCountStr(i)}`
+  return `rename_${getCountStr(i)}`
 }
 
 /** 更新表格字段 */
@@ -267,12 +336,12 @@ const updateColumns = () => {
   for (let i = 0; i < renameKeyCount.value + 1; i++) {
     cacheColumns.push({
       title: `预览${getCountStr(i)}`,
-      key: `rename-${getCountStr(i)}`,
-      width: 300,
+      key: getCountKey(i),
+      width: previewWidth,
       fixed: i == renameKeyCount.value ? 'right' : undefined,
       // @ts-ignore
       render: (rowData: JRenameFile, rowIndex) => {
-        const data: JRenameBase = rowData[`rename-${getCountStr(i)}`]
+        const data: JRenameBase = rowData[getCountKey(i)]
         return h(NFlex, null, {
           default: () => [
             data.isRenaming
@@ -281,6 +350,8 @@ const updateColumns = () => {
                   'onUpdate:value'(val) {
                     data.type = 'input'
                     data.name = val
+                    data.baseName = val.split('.').slice(0, -1).join('.')
+                    data.ext = val.split('.').pop() || ''
                   },
                   onBlur() {
                     data.isRenaming = false
@@ -357,10 +428,13 @@ const onFilesChangeFn = (op: {
       ext: file.f.name.split('.').pop() || '',
       size: file.f.size,
       time: file.f.lastModified,
+      baseName: file.f.name.split('.').slice(0, -1).join('.'),
       modifiedTime: dayjs(new Date(file.f.lastModified)).format('YYYY-MM-DD HH:mm:ss'),
     }
     for (let i = 0; i < renameKeyCount.value + 1; i++) {
       c[getCountKey(i)] = {
+        baseName: file.f.name.split('.').slice(0, -1).join('.'),
+        ext: file.f.name.split('.').pop() || '',
         name: file.f.name,
         count: i,
         type: 'origin',
@@ -372,6 +446,37 @@ const onFilesChangeFn = (op: {
   })
   fileList.value = list
 }
+
+const getFn_variables = (file: JRenameFile) => {
+  const day = dayjs(new Date(file.time)).format('YYYY:MM:DD:HH:mm:ss')
+  const [Y, M, D, h, m, s] = day.split(':')
+  const curF = file[getCountKey(renameKeyCount.value)]
+  const f = { ...file, ...curF }
+  return {
+    fullFile: file,
+    f: f,
+    t: {
+      Y,
+      M,
+      D,
+      h,
+      m,
+      s,
+    },
+  }
+}
+
+watch(
+  () => fileList.value,
+  (files) => {
+    if (!files || files.length == 0) {
+      fn_variables.value = {}
+      return
+    }
+    fn_variables.value = getFn_variables(files[0])
+  },
+  { immediate: true },
+)
 
 onMounted(() => {
   updateColumns()
