@@ -4,9 +4,24 @@
   <div>
     <DragFile @files-change="onFilesChangeFn" :webkitdirectory="false" class="mb-5">
       <template #content="{ triggerFileInput, isDragActive }">
-        <n-flex>
-          <n-button type="primary" class="mb-5" @click="triggerFileInput()">打开文件</n-button>
-          <n-button type="primary" class="mb-5" @click="rebackFn()">后退</n-button>
+        <n-flex class="mb-5">
+          <n-button type="primary" @click="triggerFileInput()">打开文件</n-button>
+          <n-button type="primary" @click="rebackFn()">后退</n-button>
+          <n-button
+            v-for="item in sortList"
+            :key="item.type"
+            :type="item.type == curSort ? 'primary' : 'default'"
+            @click="
+              () => {
+                isReverse = item.type == curSort ? !isReverse : isReverse
+                curSort = item.type
+                fileList = sortFileListFn([...fileList])
+              }
+            "
+            >{{
+              item.type == 'null' ? item.name : `${item.name}${isReverse ? '倒序' : '正序'}`
+            }}</n-button
+          >
         </n-flex>
         <n-card v-if="!fileList || fileList.length == 0" class="files">
           <div
@@ -158,7 +173,13 @@
         </template>
       </div>
 
-      <n-button @click="applyFn()">应用</n-button>
+      <n-button class="mb-5" @click="applyFn()">应用</n-button>
+      <n-flex class="mb-5">
+        <n-button v-for="item in ['win', 'linux']" @click="printShellFn(item)"
+          >{{ item }}输出</n-button
+        >
+      </n-flex>
+      <TextareaCopyable :value="shellVal" language="bash" style="width: 90%" />
     </div>
   </div>
 </template>
@@ -177,10 +198,11 @@ import {
 import { ref, h, reactive, onMounted, watch } from 'vue'
 import JCode from '@/components/JCode.vue'
 import dayjs from 'dayjs'
-import { at, type partial } from 'lodash'
+import TextareaCopyable from '@/components/TextareaCopyable.vue'
 
 type RenamePrefixed<T extends string> = `rename_${T}`
 type JRenameType = 'origin' | 'input' | 'regexp' | 'fn' | 'ext' | 'attr' | 'cover' | 'noChange'
+type SortType = 'name' | 'fullName' | 'size' | 'date' | 'null'
 type JRenameBase = {
   name: string
   ext: string
@@ -209,6 +231,18 @@ const previewWidth = 350
 const themeVars = useThemeVars()
 
 const message = useMessage()
+
+const curSort = ref(<SortType>'null')
+const isReverse = ref(false)
+const sortList = reactive(<{ name: string; type: SortType }[]>[
+  { name: '不排序', type: 'null' },
+  { name: '时间', type: 'date' },
+  { name: '大小', type: 'size' },
+  { name: '名称', type: 'name' },
+  { name: '路径', type: 'fullName' },
+])
+
+const shellVal = ref('')
 
 /** 重命名类型按钮 */
 const typeButtonList = reactive<{ type: JRenameType; name: string; isHide?: boolean }[]>([
@@ -473,6 +507,18 @@ const applyFn = () => {
         break
       // 字数补充
       case 'cover':
+        if (!cover_select.value) {
+          message.warning('请输入选择条件')
+          return
+        }
+        if (!cover_addStr.value) {
+          message.warning('请输入补充字符')
+          return
+        }
+        if (!cover_count.value) {
+          message.warning('字数不能为0')
+          return
+        }
         let newRegExpStr = ''
         let [l, r] = [0, 0]
         let isTarget = false
@@ -533,7 +579,7 @@ const applyFn = () => {
             add += newV.length - obj.value[0].length
             newName = newName.slice(0, i) + newV + newName.slice(i + obj.value[0].length)
             // 非全局一次
-            if (cover_isGlobal.value) {
+            if (!cover_isGlobal.value) {
               break
             }
             obj = matchIter.next()
@@ -562,6 +608,7 @@ const getCountStr = (i: number) => {
   return i < 9 ? '0' + (i + 1).toString() : (i + 1).toString()
 }
 
+/** 获取数量标题key */
 const getCountKey = (i: number): RenamePrefixed<string> => {
   return `rename_${getCountStr(i)}`
 }
@@ -594,16 +641,16 @@ const updateColumns = () => {
                   },
                 })
               : h('div', data.name),
+            h(
+              NTag,
+              {
+                bordered: false,
+                type: 'warning',
+              },
+              () => typeButtonList.find((c) => c.type == data.type)?.name || '无',
+            ),
             ...(data.count == renameKeyCount.value
               ? [
-                  h(
-                    NTag,
-                    {
-                      bordered: false,
-                      type: 'warning',
-                    },
-                    () => typeButtonList.find((c) => c.type == data.type)?.name || '无',
-                  ),
                   h(
                     NButton,
                     {
@@ -654,6 +701,22 @@ const updateColumns = () => {
   columns.value = cacheColumns
 }
 
+const printShellFn = (type: string) => {
+  let str = ''
+  fileList.value.forEach((c) => {
+    const d = c[getCountKey(renameKeyCount.value)]
+    if (d.name == c.name) {
+      return
+    }
+    if (type == 'win') {
+      str += `ren "${c.dir}${c.name}" "${c.dir}${d.name}" \r\n`
+    } else if (type == 'linux') {
+      str += `mv "${c.dir}${c.name}" "${c.dir}${d.name}" \r\n`
+    }
+  })
+  shellVal.value = str
+}
+
 /** 打开文件 */
 const onFilesChangeFn = (op: {
   fileList: JFile[]
@@ -668,7 +731,7 @@ const onFilesChangeFn = (op: {
     }
     const c: JRenameFile = {
       name: file.f.name,
-      dir: file.dir || '/',
+      dir: file.dir || './',
       ext: file.f.name.split('.').pop() || '',
       size: file.f.size,
       time: file.f.lastModified,
@@ -688,7 +751,60 @@ const onFilesChangeFn = (op: {
     list.push(c)
     cacheMap.set(file.fullPath, true)
   })
-  fileList.value = list
+  fileList.value = sortFileListFn(list)
+}
+
+const sortFileListFn = (list: JRenameFile[]) => {
+  if (curSort.value == 'null') {
+    return list
+  }
+  if (curSort.value == 'name') {
+    list = list.sort((a, b) => {
+      if (a.name > b.name) {
+        return -1
+      } else if (a.name == b.name) {
+        return 0
+      } else {
+        return 1
+      }
+    })
+  } else if (curSort.value == 'date') {
+    list = list.sort((a, b) => {
+      if (a.time > b.time) {
+        return -1
+      } else if (a.time == b.time) {
+        return 0
+      } else {
+        return 1
+      }
+    })
+  } else if (curSort.value == 'fullName') {
+    list = list.sort((a, b) => {
+      const an = a.dir + a.name
+      const bn = b.dir + b.name
+      if (an + '' > bn) {
+        return -1
+      } else if (an == bn) {
+        return 0
+      } else {
+        return 1
+      }
+    })
+  } else if (curSort.value == 'size') {
+    list = list.sort((a, b) => {
+      if (a.size > b.size) {
+        return -1
+      } else if (a.size == b.size) {
+        return 0
+      } else {
+        return 1
+      }
+    })
+  }
+  if (isReverse.value) {
+    list = list.reverse()
+  }
+  return list
 }
 
 /** 获取变量集合(方法类型) */

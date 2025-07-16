@@ -67,6 +67,14 @@ watch(
         var m = await import('highlight.js/lib/languages/markdown')
         hljs.registerLanguage(l, m.default)
         break
+      case 'shell':
+        var m = await import('highlight.js/lib/languages/shell')
+        hljs.registerLanguage(l, m.default)
+        break
+      case 'bash':
+        var m = await import('highlight.js/lib/languages/bash')
+        hljs.registerLanguage(l, m.default)
+        break
       default:
         console.warn(`没有找到对应的语言:${l}，请自行注册`)
         break
