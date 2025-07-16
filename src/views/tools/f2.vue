@@ -47,7 +47,12 @@
         <template v-if="curType == 'regexp'">
           <div class="mb-5">
             搜索:
-            <n-input style="width: 300px" placeholder="请输入正则" v-model:value="regexp_search" />
+            <n-input
+              style="width: 300px"
+              placeholder="请输入正则"
+              v-model:value="regexp_search"
+              clearable
+            />
           </div>
           <div class="mb-5">
             替换:
@@ -55,11 +60,14 @@
               style="width: 300px"
               placeholder="请输入替换内容"
               v-model:value="regexp_replace"
+              clearable
             />
           </div>
           <n-space item-style="display: flex;" align="center" class="mb-5">
             <n-checkbox label="全局" v-model:checked="regexp_isGlobal" />
             <n-checkbox label="忽略大小写" v-model:checked="regexp_isIgnoreCase" />
+            <n-checkbox label="正则" v-model:checked="regexp_isRegexp" />
+            <n-checkbox label="替换变量" v-model:checked="regexp_isReplaceVal" />
           </n-space>
         </template>
         <!-- 方法 -->
@@ -73,6 +81,81 @@
           ></JCode>
           <div class="ml-2">{{ fn_base_val[2] }}</div>
         </template>
+        <!-- 变量 -->
+        <template v-else-if="curType == 'attr'">
+          <div style="white-space: pre">{{ attr_example }}</div>
+          <n-input
+            style="width: 300px"
+            placeholder="{{ baseName }}.{{ ext }}"
+            v-model:value="attr_input"
+            clearable
+          />
+        </template>
+        <!-- 后缀名 -->
+        <template v-else-if="curType == 'ext'">
+          <div class="mb-5">
+            选择:
+            <n-input
+              style="width: 300px"
+              placeholder="多个用逗号隔开"
+              v-model:value="ext_select"
+              clearable
+            />
+          </div>
+          <div>
+            替换:
+            <n-input
+              style="width: 300px"
+              placeholder="输入替换的后缀名"
+              v-model:value="ext_replace"
+              clearable
+            />
+          </div>
+        </template>
+        <!-- 字数补充 -->
+        <template v-else-if="curType == 'cover'">
+          <div class="mb-5" style="width: 300px" :style="{ color: themeVars.warningColor }">
+            {{ cover_detail }}
+          </div>
+          <div class="mb-5">
+            选择:
+            <n-input
+              style="width: 300px"
+              placeholder="正则()触发"
+              v-model:value="cover_select"
+              clearable
+            />
+          </div>
+          <div class="mb-5">
+            补充:
+            <n-input
+              style="width: 300px"
+              placeholder="输入不足补充字符"
+              v-model:value="cover_addStr"
+              clearable
+            />
+          </div>
+          <div class="mb-5 flex">
+            字数:
+            <n-input-number
+              class="ml-1"
+              style="width: 300px"
+              placeholder="字数数量"
+              clearable
+              v-model:value="cover_count"
+            />
+          </div>
+          <div>
+            <n-checkbox label="全局" v-model:checked="cover_isGlobal" />
+            <n-checkbox label="忽略大小写" v-model:checked="cover_isIgnoreCase" />
+            <n-radio :checked="cover_frontOrBack === -1" @change="cover_frontOrBack = -1">
+              前缀
+            </n-radio>
+            <n-radio :checked="cover_frontOrBack === 1" @change="cover_frontOrBack = 1">
+              后缀
+            </n-radio>
+          </div>
+        </template>
       </div>
 
       <n-button @click="applyFn()">应用</n-button>
@@ -82,23 +165,22 @@
 <script setup lang="ts">
 import DragFile from '@/components/DragFile.vue'
 import { type JFile } from '@/components/DragFile.vue'
-import { useThemeVars, type DataTableColumns, NButton, NInput, NFlex, useMessage } from 'naive-ui'
+import {
+  useThemeVars,
+  type DataTableColumns,
+  NButton,
+  NInput,
+  NFlex,
+  NTag,
+  useMessage,
+} from 'naive-ui'
 import { ref, h, reactive, onMounted, watch } from 'vue'
 import JCode from '@/components/JCode.vue'
 import dayjs from 'dayjs'
+import { at, type partial } from 'lodash'
 
 type RenamePrefixed<T extends string> = `rename_${T}`
-type JRenameType =
-  | 'origin'
-  | 'input'
-  | 'regexp'
-  | 'fn'
-  | 'date'
-  | 'ext'
-  | 'attr'
-  | 'sort'
-  | 'cover'
-  | 'noChange'
+type JRenameType = 'origin' | 'input' | 'regexp' | 'fn' | 'ext' | 'attr' | 'cover' | 'noChange'
 type JRenameBase = {
   name: string
   ext: string
@@ -147,16 +229,8 @@ const typeButtonList = reactive<{ type: JRenameType; name: string; isHide?: bool
     name: '后缀名修改',
   },
   {
-    type: 'date',
-    name: '日期变量修改',
-  },
-  {
-    type: 'sort',
-    name: '排序修改',
-  },
-  {
     type: 'cover',
-    name: '数值补充修改',
+    name: '字数补充修改',
   },
   {
     type: 'origin',
@@ -199,25 +273,56 @@ const baseColumns: DataTableColumns = [
     width: 200,
   },
 ]
-
+// 正则
 const regexp_search = ref('')
 const regexp_replace = ref('')
 const regexp_isGlobal = ref(true)
 const regexp_isIgnoreCase = ref(true)
+const regexp_isRegexp = ref(true)
+const regexp_isReplaceVal = ref(true)
+// 方法
 const fn_base_val = [
   `(f,t,index,fullFile,fileList)=>{`,
   `
- // 开始你的表演
+  // 开始你的表演
+  const name = f.name
 
-  
+
   // 结束你的表演
   // 返回值
-  return f.name
+  return name
 `,
   '}',
 ]
 const fn_value = ref(fn_base_val[1])
 const fn_variables = ref<{ [x in string]: any }>({})
+// 变量
+const attr_example = `
+  name: 名称
+  baseName: 基础名称(不要后缀名)
+  ext: 后缀(不包含点)
+  YY:年
+  MM:月
+  DD:日
+  hh:时
+  mm:分
+  ss:秒
+  ms:毫秒
+  index:索引
+`
+const attr_input = ref('')
+// 后缀名
+const ext_select = ref('')
+const ext_replace = ref('')
+// 字数补充
+const cover_detail =
+  '字数补充,数量0则不触发,需用正则()触发,最多只能存在一个有效捕获的(),请不要出现(()),不然可能会出现异常'
+const cover_select = ref('')
+const cover_count = ref(0)
+const cover_addStr = ref('')
+const cover_isGlobal = ref(true)
+const cover_isIgnoreCase = ref(true)
+const cover_frontOrBack = ref(-1)
 
 /** 表格字段 */
 const columns = ref<DataTableColumns>([])
@@ -253,6 +358,21 @@ const rebackFn = () => {
   updateColumns()
 }
 
+const setNewNameFn = (child: JRenameFile, obj: Partial<JRenameBase>, type: JRenameType) => {
+  const prev = child[getCountKey(renameKeyCount.value)]
+  const newName = obj.name || prev.name
+  const n: JRenameBase = {
+    baseName: newName.split('.').slice(0, -1).join('.'),
+    ext: newName.split('.').pop() || '',
+    name: newName,
+    type: newName == prev.name ? 'noChange' : type,
+    originName: newName,
+    count: renameKeyCount.value + 1,
+    ...obj,
+  }
+  child[getCountKey(renameKeyCount.value + 1)] = n
+}
+
 /** 应用方法 */
 const applyFn = () => {
   if (!fileList.value || fileList.value.length == 0) {
@@ -264,27 +384,35 @@ const applyFn = () => {
       // 正则
       case 'regexp':
         if (!regexp_search.value) {
-          message.warning('请输入正则表达式')
+          message.warning('请输入搜索条件')
           return
         }
-        const reg = new RegExp(
-          regexp_search.value,
-          `${regexp_isGlobal.value ? 'g' : ''}${regexp_isIgnoreCase.value ? 'i' : ''}`,
-        )
+        const reg_regexp: RegExp | string = regexp_isRegexp.value
+          ? new RegExp(
+              regexp_search.value,
+              `${regexp_isGlobal.value ? 'g' : ''}${regexp_isIgnoreCase.value ? 'i' : ''}`,
+            )
+          : regexp_search.value
         fileList.value.forEach((c) => {
           const prev = c[getCountKey(renameKeyCount.value)]
-          const newName = prev.name.replace(reg, regexp_replace.value)
-          const n: JRenameBase = {
-            baseName: newName.split('.').slice(0, -1).join('.'),
-            ext: newName.split('.').pop() || '',
-            name: newName,
-            type: newName == prev.name ? 'noChange' : 'regexp',
-            originName: newName,
-            count: renameKeyCount.value + 1,
+          let newName = prev.name
+          if (regexp_isReplaceVal.value) {
+            newName = newName.replace(reg_regexp, regexp_replace.value)
+          } else {
+            let match = newName.match(reg_regexp)
+            if (match) {
+              if (!regexp_isGlobal.value) {
+                match = [match[0]]
+              }
+              match.forEach((cc) => {
+                newName = newName.replace(cc, regexp_replace.value)
+              })
+            }
           }
-          c[getCountKey(renameKeyCount.value + 1)] = n
+          setNewNameFn(c, { name: newName }, 'regexp')
         })
         break
+      // 方法
       case 'fn':
         const fnStr = `
         ${fn_base_val[0]}
@@ -295,18 +423,126 @@ const applyFn = () => {
           const prev = c[getCountKey(renameKeyCount.value)]
           const data = getFn_variables(c)
           const newName = eval(`(${fnStr})`)(data.f, data.t, i, data.fullFile, fileList.value)
-          console.log(newName)
-          const n: JRenameBase = {
-            baseName: newName.split('.').slice(0, -1).join('.'),
-            ext: newName.split('.').pop() || '',
-            name: newName,
-            type: newName == prev.name ? 'noChange' : 'fn',
-            originName: newName,
-            count: renameKeyCount.value + 1,
-          }
-          c[getCountKey(renameKeyCount.value + 1)] = n
+          setNewNameFn(c, { name: newName }, 'fn')
         })
-        // return
+        break
+      // 变量
+      case 'attr':
+        fileList.value.forEach((c, i) => {
+          const prev = c[getCountKey(renameKeyCount.value)]
+          const mlist = attr_input.value.match(/\{\{[\w\s]+\}\}/g)
+          const data = getFn_variables(c)
+          let newName = attr_input.value
+          if (mlist) {
+            mlist.forEach((m) => {
+              const k = m.slice(2, -2).trim()
+              console.log(k)
+              // @ts-ignore
+              const v =
+                // @ts-ignore
+                data.f[k] != undefined
+                  ? // @ts-ignore
+                    data.f[k]
+                  : // @ts-ignore
+                    data.t[k] != undefined
+                    ? // @ts-ignore
+                      data.t[k]
+                    : k == 'index'
+                      ? i
+                      : ''
+              newName = newName.replace(m, v)
+            })
+          }
+          setNewNameFn(c, { name: newName }, 'attr')
+        })
+        break
+      // 后缀名
+      case 'ext':
+        const selectList = ext_select.value.split(',').map((c) => c.trim())
+        fileList.value.forEach((c, i) => {
+          const prev = c[getCountKey(renameKeyCount.value)]
+          const data = getFn_variables(c)
+          let extName = prev.name.split('.').pop() || ''
+          const baseName = prev.name.split('.').slice(0, -1).join('.')
+          if (selectList.includes(extName)) {
+            extName = ext_replace.value
+          }
+          const newName = extName ? [baseName, extName].join('.') : baseName
+          setNewNameFn(c, { name: newName }, 'ext')
+        })
+        break
+      // 字数补充
+      case 'cover':
+        let newRegExpStr = ''
+        let [l, r] = [0, 0]
+        let isTarget = false
+        let select_Count = 0
+        if (cover_select.value[0] == '(') {
+          newRegExpStr = cover_select.value
+          select_Count = 1
+        } else {
+          for (let i = 0; i < cover_select.value.length; i++) {
+            if (l == r) {
+              l += 1
+              if (!isTarget) {
+                select_Count++
+              }
+              newRegExpStr += '('
+            }
+            // 转义符,跳一下
+            if (cover_select.value[i] == '\\' && cover_select.value[i + 1] != undefined) {
+              newRegExpStr += cover_select.value[i] + cover_select.value[i + 1]
+              i++
+              continue
+            } else if (cover_select.value[i] == '(') {
+              newRegExpStr += ')'
+              r++
+              l++
+              select_Count++
+              isTarget = true
+            } else if (cover_select.value[i] == ')') {
+              r++
+            }
+            newRegExpStr += cover_select.value[i]
+          }
+        }
+
+        if (l > r) {
+          newRegExpStr += ')'
+        }
+        const reg_cover = new RegExp(newRegExpStr, `g${cover_isIgnoreCase.value ? 'i' : ''}`)
+        fileList.value.forEach((c, i) => {
+          const prev = c[getCountKey(renameKeyCount.value)]
+          let newName = prev.name
+
+          const matchIter = newName.matchAll(reg_cover)
+          var obj = matchIter.next()
+          var add = 0
+          while (obj.value) {
+            const i = add + obj.value.index
+            const a = [...obj.value]
+            const len = a[select_Count].length
+            for (let i = 0; i < cover_count.value - len; i++) {
+              if (cover_frontOrBack.value == -1) {
+                a[select_Count] = cover_addStr.value + a[select_Count]
+              } else if (cover_frontOrBack.value == 1) {
+                a[select_Count] += cover_addStr.value
+              }
+            }
+            let newV = a.slice(1).join('')
+            add += newV.length - obj.value[0].length
+            newName = newName.slice(0, i) + newV + newName.slice(i + obj.value[0].length)
+            // 非全局一次
+            if (cover_isGlobal.value) {
+              break
+            }
+            obj = matchIter.next()
+          }
+
+          setNewNameFn(c, { name: newName }, 'cover')
+
+          setNewNameFn(c, { name: newName }, 'cover')
+        })
         break
       default:
         message.warning('无修改')
@@ -360,6 +596,14 @@ const updateColumns = () => {
               : h('div', data.name),
             ...(data.count == renameKeyCount.value
               ? [
+                  h(
+                    NTag,
+                    {
+                      bordered: false,
+                      type: 'warning',
+                    },
+                    () => typeButtonList.find((c) => c.type == data.type)?.name || '无',
+                  ),
                   h(
                     NButton,
                     {
@@ -447,21 +691,22 @@ const onFilesChangeFn = (op: {
   fileList.value = list
 }
 
+/** 获取变量集合(方法类型) */
 const getFn_variables = (file: JRenameFile) => {
   const day = dayjs(new Date(file.time)).format('YYYY:MM:DD:HH:mm:ss')
-  const [Y, M, D, h, m, s] = day.split(':')
+  const [YY, MM, DD, hh, mm, ss] = day.split(':')
   const curF = file[getCountKey(renameKeyCount.value)]
   const f = { ...file, ...curF }
   return {
     fullFile: file,
     f: f,
     t: {
-      Y,
-      M,
-      D,
-      h,
-      m,
-      s,
+      YY,
+      MM,
+      DD,
+      hh,
+      mm,
+      ss,
     },
     index: 0,
     fileList: fileList.value,

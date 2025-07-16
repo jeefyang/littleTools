@@ -122,7 +122,7 @@ const myCompletion: CompletionSource = (context) => {
       ...Object.keys(cur).map<Completion>((c) => ({
         label: c,
         type: 'prototype',
-        detail: `${typeof cur[c]} default: ${cur[c]}`,
+        detail: `${typeof cur[c]} example: ${cur[c]}`,
         apply: c,
       })),
     )
