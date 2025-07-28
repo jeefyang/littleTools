@@ -4,7 +4,9 @@ import { RouterView } from 'vue-router'
 // theme
 import { darkTheme } from 'naive-ui'
 
-onMounted(async () => {})
+onMounted(async () => {
+  console.log(import.meta.env.VITE_TOKEN)
+})
 </script>
 
 <template>

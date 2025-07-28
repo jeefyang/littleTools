@@ -2,6 +2,7 @@ import path from "path";
 import fs from "fs";
 import express from "express";
 import cors from "cors";
+import session from "express-session";
 
 
 const jsonUrl = './config.jsonc';
@@ -21,10 +22,20 @@ console.log(configData);
 const app = express();
 app.use(cors());
 
+// 拦截
+app.use((req, res, next) => {
+    if (req.path == '/home/index') {
+        res.status(401).json({ code: 401, message: "未登录" }); // 拦截未登录请求
+    }
+    else {
+        next();
+
+    }
+});
+
 // 路由列表
 app.get("/api/routerList", (req, res) => {
     res.json({ msg: "操作成功", data: eval(`(${fs.readFileSync(`${process.env.VITE_PRIVATE_RES_DIR}/router.json`)})`) });
-
 });
 
 // 接口
@@ -43,6 +54,7 @@ app.get("/res/{*splat}", (req, res) => {
         e && res.sendStatus(404);
     });
 });
+
 
 (async () => {
     // 开发模式下,直接去读取 vite 的配置文件
@@ -75,6 +87,9 @@ app.get("/res/{*splat}", (req, res) => {
 
     }
 })();
+
+
+
 
 
 

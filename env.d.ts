@@ -1,7 +1,9 @@
 /// <reference types="vite/client" />
 
 type env = {
+    /** 当前环境 */
     VITE_NODE_ENV: string;
+    /** token */
     VITE_TOKEN: string;
     /** 网页端的 Vue 目录 */
     VITE_VUE_DIR: string;
