@@ -35,4 +35,7 @@ build_vue
 private_res
 res
 
+.env.production
+.env.development
+
 /*.d.ts

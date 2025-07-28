@@ -17,6 +17,12 @@ import UnoCSS from 'unocss/vite';
 // https://vite.dev/config/
 // @ts-ignore
 export default defineConfig(({ mode }) => {
+
+    const envSrc = `./.env.${mode}`;
+    if (!fs.existsSync(envSrc)) {
+        console.log('环境变量文件不存在，已创建示例文件', envSrc + '.example');
+        fs.copyFileSync(envSrc + '.example', envSrc);
+    }
     // @ts-ignore
     const env: NodeJS.ProcessEnv = loadEnv(mode, process.cwd(), ''); // 加载所有环境变量
     // 仅在开发使用
