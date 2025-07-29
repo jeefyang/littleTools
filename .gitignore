@@ -32,10 +32,8 @@ coverage
 config.jsonc
 build_server
 build_vue
-private_res
-res
+private_res*
+res*
 
-.env.production
-.env.development
 
 /*.d.ts

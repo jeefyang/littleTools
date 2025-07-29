@@ -8,7 +8,7 @@ import { createPinia } from 'pinia';
 import 'vfonts/FiraCode.css';
 import 'virtual:uno.css';
 import './styles/index.scss';
-import 'default-passive-events';
+// import 'default-passive-events';
 
 
 import App from './App.vue';

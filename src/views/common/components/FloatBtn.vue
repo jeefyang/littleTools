@@ -16,16 +16,16 @@
     </n-icon>
     <div class="over"></div>
   </n-float-button>
-  <RouterModal v-model:show="shwoRouter"></RouterModal>
+  <MenuModal v-model:show="shwoMenu"></MenuModal>
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
-import RouterModal from './RouterModal.vue'
+import MenuModal from './MenuModal.vue'
 import Navigation from '@/assets/navigation.svg'
 
 let bodyDiv: HTMLDivElement | undefined = undefined
 
-const shwoRouter = ref(false)
+const shwoMenu = ref(false)
 /** 悬浮按钮左坐标 */
 const floatLeft = ref(20)
 /** 悬浮按钮下坐标 */
@@ -128,7 +128,7 @@ const clickBtn = () => {
     return
   }
   clickTimer = setTimeout(() => {
-    shwoRouter.value = true
+    shwoMenu.value = true
   }, 300)
 }
 

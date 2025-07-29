@@ -15,6 +15,8 @@
 
     <!-- 悬浮按钮  -->
     <FloatBtn></FloatBtn>
+    <!-- 登录框 -->
+    <LoginModal v-model:show="userStore.isShowLogin"></LoginModal>
   </div>
 </template>
 <script lang="ts" setup>
@@ -33,9 +35,12 @@ import {
 import RouterPages from './components/RouterPages.vue'
 import FloatBtn from './components/FloatBtn.vue'
 import { useRouterStore } from '@/stores/routerStore'
+import LoginModal from './components/LoginModal.vue'
+import { useUserStore } from '@/stores/userStore'
 
 const initCacheKeyList = ref(<string[]>[])
 const routerStore = useRouterStore()
+const userStore = useUserStore()
 
 watch(
   () => routerStore.changePageListCount,

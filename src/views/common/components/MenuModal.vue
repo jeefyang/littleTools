@@ -1,16 +1,27 @@
 <template>
-  <n-modal title="路由" v-model:show="modelShow" preset="dialog">
-    <NButton class="btn" v-for="item in routerList" :key="item.router" @click="toUrl(item)">{{
-      item.title
-    }}</NButton>
+  <n-modal title="菜单" v-model:show="modelShow" preset="dialog">
+    <n-card class="menu">
+      <div>目录</div>
+      <NButton class="btn" v-for="item in routerList" :key="item.router" @click="toUrl(item)">{{
+        item.title
+      }}</NButton>
+    </n-card>
+    <template #action>
+      <NButton type="primary" @click="((modelShow = false), (userStore.isShowLogin = true))"
+        >登录</NButton
+      >
+      <NButton @click="userStore.logout()">退出</NButton>
+    </template>
   </n-modal>
 </template>
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useRouterStore } from '@/stores/routerStore'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/userStore'
 
 const routerStore = useRouterStore()
+const userStore = useUserStore()
 const router = useRouter()
 
 const props = defineProps({

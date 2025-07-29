@@ -3,17 +3,26 @@ import { defineConfig, loadEnv } from 'vite';
 import { VitePluginNode } from "vite-plugin-node";
 import fs from "node:fs";
 
-
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-    const envSrc = `./.env.${mode}`;
-    if (!fs.existsSync(envSrc)) {
-        console.log('环境变量文件不存在，已创建示例文件');
-        fs.copyFileSync(envSrc + '.example', envSrc);
-    }
+
+
+    (['./.env.local', `./.env.${mode}.local`]).forEach(k => {
+        if (!fs.existsSync(k)) {
+            fs.writeFileSync(k, '');
+        }
+    });
 
     // @ts-ignore
     const env: NodeJS.ProcessEnv = loadEnv(mode, process.cwd(), ''); // 加载所有环境变量
+    /** 创建文件夹 */
+    const dirKeys: (keyof env)[] = ['VITE_PRIVATE_RES_DIR', 'VITE_PRIVATE_RES_DIR'];
+    for (let k of dirKeys) {
+        if (!fs.existsSync(env[k])) {
+            fs.mkdirSync(env[k]);
+        }
+    }
+
     // 仅在开发使用
     const exampleJsonUrl = './config.example.jsonc';
     const port = mode == "development" ? eval(`(${fs.readFileSync(exampleJsonUrl, "utf-8")})`).port : 3000;

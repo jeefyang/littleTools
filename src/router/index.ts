@@ -19,8 +19,12 @@ const router = createRouter({
     ],
 });
 
+/**
+ * 路由初始化
+ */
 let isInit = false;
 router.beforeEach(async (to, from, next) => {
+    console.log(to, from);
     if (!isInit) {
         isInit = true;
         const routeStore = useRouterStore();
