@@ -1,13 +1,13 @@
 import { useUserStore } from "@/stores/userStore";
-import { useRoute } from "vue-router";
 
-const route = useRoute();
+
 const userStore = useUserStore();
 export function jFetch(o: { method: "GET" | "POST", url: string, data: any; }): Promise<any> {
+
     const headers = new Headers({
         "Content-Type": "application/json",
         'token': userStore.token,
-        'router': route.path,
+        'router': location.pathname,
     } as JHeaderType);
     return new Promise((res, rej) => {
         (() => {
