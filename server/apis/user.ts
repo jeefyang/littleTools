@@ -1,4 +1,3 @@
-import { Express } from "express";
 import { Main } from "../main";
 
 export function userApis(this: Main) {
