@@ -35,5 +35,5 @@ build_vue
 private_res*
 res*
 
-
+db/*.sqlite3
 /*.d.ts

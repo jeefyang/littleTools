@@ -4,6 +4,8 @@ import express from "express";
 import cors from "cors";
 import session from "express-session";
 import { userApis } from "./apis/user";
+import { User } from "./dbTypes/user";
+import { KnexDB } from "./knex_db";
 
 
 export class Main {
@@ -12,6 +14,7 @@ export class Main {
     exampleJsonUrl = './config.example.jsonc';
     app = express();
     configData: { port: number; } | null = null;
+    db = new KnexDB();
 
     constructor() {
         if (!fs.existsSync(this.jsonUrl)) {
@@ -30,6 +33,8 @@ export class Main {
         if (!this.configData) {
             return;
         }
+
+        await this.db.init();
         this.setPlugin();
         this.setApi();
         this.setRes();

@@ -13,10 +13,6 @@ type env = {
     VITE_RES_DIR: string;
     /** 私有资源目录 */
     VITE_PRIVATE_RES_DIR: string;
-    /** 数据库名 */
-    VITE_SQLITE_DB_NAME: string;
-    /** 数据库密码 */
-    VITE_SQLITE_DB_PASSWORD: string;
     /** 默认用户名 */
     VITE_INIT_LOGIN_USERNAME: string;
     /** 初始密码 */
