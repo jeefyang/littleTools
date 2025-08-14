@@ -2,7 +2,7 @@ import Knex from "knex";
 import { type User } from "./dbTypes/user";
 //@ts-ignore
 import config from "knexfile.mjs";
-import { bcryptUtil } from "./utils/bcryptUtil";
+import { cryptoUtil } from "./utils/cryptoUtil";
 
 declare type config = { [x in string]: Knex.Knex.Config };
 
@@ -26,7 +26,7 @@ export class KnexDB {
 
             await this.table("users").insert([{
                 username: process.env.VITE_INIT_LOGIN_USERNAME,
-                password: bcryptUtil.hasedPassword(process.env.VITE_INIT_LOGIN_PASSWORD),
+                password: cryptoUtil.hasedPassword(process.env.VITE_INIT_LOGIN_PASSWORD),
                 email: ""
             }]);
         }
@@ -44,6 +44,8 @@ export class KnexDB {
         return this.knex!.select(args).from(table);
     }
 
-
+    where<K extends keyof DBTableType>(table: K, args: Partial<DBTableType[K]>) {
+        return this.knex!.table(table).where(args);
+    }
 
 }

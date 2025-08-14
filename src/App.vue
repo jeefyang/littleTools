@@ -3,9 +3,11 @@ import { onMounted, ref } from 'vue'
 import { RouterView } from 'vue-router'
 // theme
 import { darkTheme } from 'naive-ui'
+import { useUserStore } from './stores/userStore'
 
 onMounted(async () => {
-  console.log(import.meta.env.VITE_TOKEN)
+  const userStore = useUserStore()
+  userStore.updateUserInfo()
 })
 </script>
 

@@ -16,7 +16,7 @@
     <!-- 悬浮按钮  -->
     <FloatBtn></FloatBtn>
     <!-- 登录框 -->
-    <LoginModal v-model:show="userStore.isShowLogin"></LoginModal>
+    <LoginModal></LoginModal>
   </div>
 </template>
 <script lang="ts" setup>

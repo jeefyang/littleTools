@@ -6,7 +6,7 @@ export function jFetch(o: { method: "GET" | "POST", url: string, data: any; }): 
 
     const headers = new Headers({
         "Content-Type": "application/json",
-        'token': userStore.token,
+        'token': userStore?.userInfo?.token || "",
         'router': location.pathname,
     } as JHeaderType);
     return new Promise((res, rej) => {

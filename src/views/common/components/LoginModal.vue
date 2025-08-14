@@ -1,12 +1,12 @@
 <template>
-  <n-modal title="登录" v-model:show="modelShow" preset="dialog" :mask-closable="false">
+  <n-modal title="登录" v-model:show="userStore.isShowLogin" preset="dialog" :mask-closable="false">
     <n-form ref="formRef" :model="model" label-placement="left" class="mt-10">
       <n-form-item
         label="用户"
-        path="userName"
+        path="username"
         :rule="[{ required: true, message: '请输入用户名' }]"
       >
-        <n-input v-model:value="model.userName" placeholder="请输入用户名" />
+        <n-input v-model:value="model.username" placeholder="请输入用户名" />
       </n-form-item>
       <n-form-item label="密码" path="password" :rule="[{ required: true, message: '请输入密码' }]">
         <n-input
@@ -14,6 +14,7 @@
           v-model:value="model.password"
           placeholder="请输入密码"
           show-password-on="click"
+          :input-props="{ autocomplete: 'off' }"
         />
       </n-form-item>
     </n-form>
@@ -24,28 +25,18 @@
 </template>
 <script lang="ts" setup>
 import UserApi from '@/apis/UserApi'
+import { useUserStore } from '@/stores/userStore'
+import { saveKeyStorage } from '@/utils/storage'
 import type { FormInst } from 'naive-ui'
-import { computed, reactive, ref } from 'vue'
+import { useMessage } from 'naive-ui'
+import { computed, onActivated, onUpdated, reactive, ref } from 'vue'
 
 const formRef = ref<FormInst | null>(null)
-
-const props = defineProps<{
-  show: boolean
-}>()
-
-const emits = defineEmits<{
-  (e: 'update:show', val: boolean): void
-}>()
-
-const modelShow = computed({
-  get: () => props.show,
-  set: (val) => {
-    emits('update:show', val)
-  },
-})
+const message = useMessage()
+const userStore = useUserStore()
 
 const model = reactive<UserLoginApi['from']>({
-  userName: '',
+  username: '',
   password: '',
 })
 
@@ -53,8 +44,20 @@ const submit = async () => {
   await formRef.value!.validate()
 
   UserApi.login(model).then((res) => {
-    console.log(res)
+    if (res.code != 200) {
+      return message.error(res.msg)
+    }
+    saveKeyStorage('user', res.data)
+    userStore.updateUserInfo()
+    userStore.isShowLogin = false
   })
 }
+
+onUpdated(() => {
+  Object.keys(model).forEach((key) => {
+    //@ts-ignore
+    model[key] = ''
+  })
+})
 </script>
 <style lang="scss" scoped></style>

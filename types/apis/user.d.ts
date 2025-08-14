@@ -3,10 +3,12 @@
 
 interface UserLoginApi {
     from: {
-        userName: string,
+        username: string,
         password: string;
     };
     to: {
-        token?: string;
+        token: string;
+        email: string;
+        username: string;
     };
 }

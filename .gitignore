@@ -37,3 +37,6 @@ res*
 
 db/*.sqlite3
 /*.d.ts
+
+*.http
+*.rest

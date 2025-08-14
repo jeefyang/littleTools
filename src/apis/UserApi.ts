@@ -1,5 +1,7 @@
 import { jFetch } from "@/utils/jFetch";
 
+const headerUrl = "user/";
+
 export default {
-    login: ((data) => jFetch({ method: 'POST', data, url: "user/login" })) as JFetchApiType<UserLoginApi>
+    login: ((data) => jFetch({ method: 'POST', data, url: headerUrl + "login" })) as JFetchApiType<UserLoginApi>
 };

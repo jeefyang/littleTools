@@ -4,8 +4,15 @@ import express from "express";
 import cors from "cors";
 import session from "express-session";
 import { userApis } from "./apis/user";
-import { User } from "./dbTypes/user";
 import { KnexDB } from "./knex_db";
+
+// 定义错误接口
+interface AppError extends Error {
+    statusCode?: number;
+    status?: string;
+}
+
+
 
 
 export class Main {
@@ -15,6 +22,7 @@ export class Main {
     app = express();
     configData: { port: number; } | null = null;
     db = new KnexDB();
+    routerList: { path: string | RegExp, method: "get" | 'post'; }[] = [];
 
     constructor() {
         if (!fs.existsSync(this.jsonUrl)) {
@@ -36,6 +44,7 @@ export class Main {
 
         await this.db.init();
         this.setPlugin();
+        this.setCapture();
         this.setApi();
         this.setRes();
         await this.setVue();
@@ -51,20 +60,55 @@ export class Main {
         }
     }
 
+    /**
+     * 设置插件
+     */
     setPlugin() {
         this.app.use(cors());
+        this.app.use(express.json());
     }
 
+    /**
+     * 捕获错误
+     */
+    setCapture() {
+        this.app.use((err: AppError, req: express.Request, res: express.Response, next: express.NextFunction) => {
+            console.error(`错误: [${new Date().toISOString()}] ${err.stack}`);
+            res.status(err.statusCode || 500).json({
+                code: 'INTERNAL_SERVER_ERROR',
+                msg: process.env.VITE_NODE_ENV === 'production'
+                    ? '服务暂时不可用'
+                    : err.message,
+                timestamp: new Date().toISOString()
+            });
+        });
+        // 未处理的异常和拒绝，防止进程崩溃
+        process.on('uncaughtException', (error: Error) => {
+            console.error('未捕获的异常:', error);
+            // 可选择记录日志或执行清理操作，但不退出进程
+        });
+
+        process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
+            console.error('未处理的 Promise 拒绝:', reason);
+            // 可选择记录日志或执行清理操作，但不退出进程
+        });
+
+
+    }
+
+    /**
+     * 设置接口
+     */
     setApi() {
 
         // 测试接口
         this.app.get("/api/test", (req, res) => {
-            res.json({ msg: "hello world!!!", env: process.env.VITE_NODE_ENV });
+            res.json({ code: 200, msg: "hello world!!!", data: process.env.VITE_NODE_ENV });
         });
 
         // 路由列表
         this.app.get("/api/routerList", (req, res) => {
-            res.json({ msg: "操作成功", data: eval(`(${fs.readFileSync(`${process.env.VITE_PRIVATE_RES_DIR}/router.json`)})`) });
+            res.json({ code: 200, msg: "操作成功", data: eval(`(${fs.readFileSync(`${process.env.VITE_PRIVATE_RES_DIR}/router.json`)})`) });
         });
 
         // 其他接口
@@ -72,7 +116,7 @@ export class Main {
 
         // 没有接口
         this.app.get("/api/{*splat}", (req, res) => {
-            res.json({ msg: "查无接口", status: 404 });
+            res.json({ msg: "查无接口", code: 404 });
         });
     }
 
@@ -87,6 +131,7 @@ export class Main {
         });
     }
 
+    /** 设置vue路由 */
     async setVue() {
         // 开发模式下,直接去读取 vite 的配置文件
         if (process.env.NODE_ENV == 'development') {
@@ -94,7 +139,7 @@ export class Main {
             const vite = await createServer({
                 root: path.resolve(path.join(process.env.VITE_VUE_DIR)),
                 server: { middlewareMode: true },
-                configFile: path.resolve('./vite.config.ts')
+                configFile: path.resolve('./vite.config.ts'),
             });
             this.app.use(vite.middlewares);
         }
@@ -114,6 +159,31 @@ export class Main {
             });
         }
     }
+
+
+
+    appGet(...args: Parameters<typeof this.app.get>): ReturnType<typeof this.app.get> {
+        const c = args[0];
+        if (Array.isArray(c)) {
+            c.forEach(cc => {
+                this.routerList.push({ path: cc, method: "get" });
+            });
+        }
+        return this.app.get(...args);
+    }
+
+    appPost(...args: Parameters<typeof this.app.post>): ReturnType<typeof this.app.post> {
+        const c = args[0];
+        if (Array.isArray(c)) {
+            c.forEach(cc => {
+                this.routerList.push({ path: cc, method: "post" });
+            });
+        }
+        return this.app.post(...args);
+    }
+
+
+
 
 }
 

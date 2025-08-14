@@ -9,4 +9,10 @@ type JHeaderType = {
     authKey?: string;
 };
 
-type JFetchApiType<T extends { from: any, to: any; }> = (data: T['from']) => Promise<T['to']>;
+type JResposeType<T extends { from: any, to: any; } = { from: any, to: any; }> = {
+    code: number;
+    data: T['to'];
+    msg: string;
+};
+
+type JFetchApiType<T extends { from: any, to: any; }> = (data: T['from']) => Promise<JResposeType<T>>;

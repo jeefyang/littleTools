@@ -7,10 +7,15 @@
       }}</NButton>
     </n-card>
     <template #action>
-      <NButton type="primary" @click="((modelShow = false), (userStore.isShowLogin = true))"
-        >登录</NButton
-      >
-      <NButton @click="userStore.logout()">退出</NButton>
+      <n-flex justify="space-between" style="width: 100%" align="center">
+        <div>当前用户:{{ userStore.userInfo?.username || '' }}</div>
+        <n-flex>
+          <NButton type="primary" @click="((modelShow = false), (userStore.isShowLogin = true))"
+            >登录</NButton
+          >
+          <NButton @click="userStore.logout()">退出</NButton>
+        </n-flex>
+      </n-flex>
     </template>
   </n-modal>
 </template>
