@@ -1,7 +1,7 @@
 
 
 
-interface UserLoginApi {
+interface UserApiLogin {
     from: {
         username: string,
         password: string;

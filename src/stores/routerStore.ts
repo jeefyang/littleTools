@@ -1,3 +1,5 @@
+import CommonApi from "@/apis/CommonApi";
+import { jFetch } from "@/utils/jFetch";
 import { defineStore } from "pinia";
 import { ref, type Ref } from "vue";
 import type { RouteLocationNormalizedLoadedGeneric, Router } from "vue-router";
@@ -5,18 +7,9 @@ import type { RouteLocationNormalizedLoadedGeneric, Router } from "vue-router";
 
 export const useRouterStore = defineStore('router', () => {
     /** 路由列表 */
-    const routerList = ref(<{
-        absUrl: string;
-        title: string;
-        router: string;
-        /** 是否多开 */
-        isMulti: string;
-        /** 是否重载 */
-        isRenew: string;
-        /** 是否在菜单显示 */
-        isMenu: string;
+    const routerList = ref(<(JRouterType & {
         removeFn?: () => any;
-    }[]>[]);
+    })[]>[]);
     /** 页面组件列表 */
     const views = import.meta.glob('../views/**/*.vue');
     /** 存储页面标签列表key */
@@ -62,10 +55,13 @@ export const useRouterStore = defineStore('router', () => {
 
     /** 初始化 */
     const init = async (router: Router) => {
-
+        console.log("xxx", router);
+        routerList.value.forEach(c => {
+            router.removeRoute(`/${c.router}`);
+        });
         const res: {
             data: { [x in string]: typeof routerList.value[number] };
-        } = await (await fetch('/api/routerList')).json();
+        } = await CommonApi.routerList();
         const list: typeof routerList.value = [];
         for (let key in res.data) {
             const item = res.data[key];

@@ -1,12 +1,12 @@
 import { Main } from "../main";
 import { cryptoUtil } from "../utils/cryptoUtil";
 
-export function userApis(this: Main) {
-    const apiName = 'user';
+export function OPApis(this: Main) {
+    const apiName = 'op';
     const getUrl = (url: string) => {
         return process.env.VITE_API_BASE_URL + apiName + url;
     };
-    this.appPost(getUrl('/login'), async (req, res) => {
+    this.appPost(getUrl('/pageList'), async (req, res) => {
         const { username, password } = req.body as UserApiLogin['from'];
         const u = await this.db.where("users", { username });
         if (!u || u.length == 0) {

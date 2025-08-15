@@ -25,17 +25,21 @@
 </template>
 <script lang="ts" setup>
 import UserApi from '@/apis/UserApi'
+import { useRouterStore } from '@/stores/routerStore'
 import { useUserStore } from '@/stores/userStore'
 import { saveKeyStorage } from '@/utils/storage'
 import type { FormInst } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 import { computed, onActivated, onUpdated, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const formRef = ref<FormInst | null>(null)
 const message = useMessage()
 const userStore = useUserStore()
+const routerStore = useRouterStore()
+const router = useRouter()
 
-const model = reactive<UserLoginApi['from']>({
+const model = reactive<UserApiLogin['from']>({
   username: '',
   password: '',
 })
@@ -49,7 +53,9 @@ const submit = async () => {
     }
     saveKeyStorage('user', res.data)
     userStore.updateUserInfo()
+    routerStore.init(router)
     userStore.isShowLogin = false
+    userStore.isUpdateLoginCount++
   })
 }
 

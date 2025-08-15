@@ -13,7 +13,7 @@
           <NButton type="primary" @click="((modelShow = false), (userStore.isShowLogin = true))"
             >登录</NButton
           >
-          <NButton @click="userStore.logout()">退出</NButton>
+          <NButton @click="logoutFn">退出</NButton>
         </n-flex>
       </n-flex>
     </template>
@@ -46,6 +46,11 @@ const modelShow = computed({
 const routerList = computed(() => {
   return routerStore.routerList.filter((c) => c.isMenu)
 })
+
+const logoutFn = async () => {
+  userStore.logout()
+  await routerStore.init(router)
+}
 
 const toUrl = (item: (typeof routerStore.routerList)[number]) => {
   if (item.isMulti == '1' || item.isRenew == '1') {

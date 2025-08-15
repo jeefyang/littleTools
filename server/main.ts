@@ -5,6 +5,7 @@ import cors from "cors";
 import session from "express-session";
 import { userApis } from "./apis/user";
 import { KnexDB } from "./knex_db";
+import { cryptoUtil } from "./utils/cryptoUtil";
 
 // 定义错误接口
 interface AppError extends Error {
@@ -17,11 +18,11 @@ interface AppError extends Error {
 
 export class Main {
 
-    jsonUrl = './config.jsonc';
-    exampleJsonUrl = './config.example.jsonc';
-    app = express();
+    readonly jsonUrl = './config.jsonc';
+    readonly exampleJsonUrl = './config.example.jsonc';
+    readonly app = express();
     configData: { port: number; } | null = null;
-    db = new KnexDB();
+    readonly db = new KnexDB();
     routerList: { path: string | RegExp, method: "get" | 'post'; }[] = [];
 
     constructor() {
@@ -108,9 +109,18 @@ export class Main {
 
         // 路由列表
         this.app.get("/api/routerList", (req, res) => {
-            res.json({ code: 200, msg: "操作成功", data: eval(`(${fs.readFileSync(`${process.env.VITE_PRIVATE_RES_DIR}/router.json`)})`) });
+            const j: { [x: string]: JRouterType; } = eval(`(${fs.readFileSync(`${process.env.VITE_PRIVATE_RES_DIR}/router.json`)})`);
+            const { token } = req.headers as JHeaderType;
+            if (!token || !cryptoUtil.verifyToken(token)) {
+                for (let key in j) {
+                    if (j[key].isLogin != "1") {
+                        continue;
+                    }
+                    delete j[key];
+                }
+            }
+            res.json({ code: 200, msg: "操作成功", data: j });
         });
-
         // 其他接口
         userApis.bind(this)();
 
@@ -160,9 +170,8 @@ export class Main {
         }
     }
 
-
-
-    appGet(...args: Parameters<typeof this.app.get>): ReturnType<typeof this.app.get> {
+    // @ts-ignore
+    readonly appGet: typeof this.app.get = (...args: Parameters<typeof this.app.get>) => {
         const c = args[0];
         if (Array.isArray(c)) {
             c.forEach(cc => {
@@ -170,17 +179,21 @@ export class Main {
             });
         }
         return this.app.get(...args);
-    }
+    };
 
-    appPost(...args: Parameters<typeof this.app.post>): ReturnType<typeof this.app.post> {
+
+
+    // @ts-ignore
+    readonly appPost: typeof this.app.post = (...args: Parameters<typeof this.app.post>) => {
         const c = args[0];
+        const b = args[1];
         if (Array.isArray(c)) {
             c.forEach(cc => {
                 this.routerList.push({ path: cc, method: "post" });
             });
         }
         return this.app.post(...args);
-    }
+    };
 
 
 

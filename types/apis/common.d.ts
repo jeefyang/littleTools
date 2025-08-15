@@ -1,3 +1,5 @@
+
+
 type JHeaderType = {
     /** 请求方式 */
     'Content-Type': string;
@@ -15,4 +17,9 @@ type JResposeType<T extends { from: any, to: any; } = { from: any, to: any; }> =
     msg: string;
 };
 
-type JFetchApiType<T extends { from: any, to: any; }> = (data: T['from']) => Promise<JResposeType<T>>;
+type JFetchApiType<T extends { from?: any, to: any; }> = undefined extends T['from'] ? (data?: T['from']) => Promise<JResposeType<T>> : (data: T['from']) => Promise<JResposeType<T>>;
+
+interface RouterListApi {
+    from?: {};
+    to: { [x: string]: JRouterType; };
+}

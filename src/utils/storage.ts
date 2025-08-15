@@ -1,7 +1,7 @@
 
 
 type BaseKeysType = {
-    user: UserLoginApi['to'];
+    user: UserApiLogin['to'];
 };
 
 type OtherKeysType = Omit<{ [x: string]: any; }, keyof BaseKeysType>;

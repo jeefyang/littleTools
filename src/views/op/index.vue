@@ -1,0 +1,18 @@
+<template>
+  <!-- $title:配置 -->
+  <!-- $isMulti:0 -->
+  <!-- $isRenew:0 -->
+  <!-- $isMenu:1 -->
+  <!-- $isLogin:1 -->
+
+  <div>test1</div>
+  <input />
+</template>
+
+<script setup lang="ts">
+import { onUnmounted } from 'vue'
+
+onUnmounted(() => {
+  console.log('测试组件销毁')
+})
+</script>

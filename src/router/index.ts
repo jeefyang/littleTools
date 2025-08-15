@@ -1,4 +1,5 @@
 import { useRouterStore } from '@/stores/routerStore';
+import { useUserStore } from '@/stores/userStore';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
@@ -26,6 +27,7 @@ let isInit = false;
 router.beforeEach(async (to, from, next) => {
     console.log(to, from);
     if (!isInit) {
+        useUserStore();
         isInit = true;
         const routeStore = useRouterStore();
         await routeStore.init(router);

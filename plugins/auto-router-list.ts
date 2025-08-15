@@ -2,6 +2,7 @@
 import type { Plugin, ResolvedConfig, TransformResult } from 'vite';
 import fs from "node:fs";
 import path from "node:path";
+import { JGlobalRouterType } from "../types/export.d";
 
 
 interface PluginOptions {
@@ -38,7 +39,7 @@ export default function autoRouterList(options: PluginOptions): Plugin {
                 continue;
             }
             const str = fs.readFileSync(c, 'utf-8');
-            const keyList = ['title', 'isMulti', 'isRenew', 'isMenu'];
+            const keyList: JGlobalRouterType[] = ['title', 'isMulti', 'sisRenew', 'isMenu', 'isLogin'];
             const data: any = keyList.map((k) => {
                 return str.match(new RegExp(`<!--\\s*\\$${k}:(.*?)\\s*-->`))?.[1];
             }).reduce((a, c, i) => {
