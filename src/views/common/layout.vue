@@ -7,7 +7,7 @@
       <div class="main">
         <RouterView v-slot="{ Component, route }">
           <keep-alive :initCacheKeyList="initCacheKeyList">
-            <component :is="Component" :key="`${route.path}?t=${route.query['t']}`"></component>
+            <component :is="Component" :key="getRouterKey(route.path, route.query)"></component>
           </keep-alive>
         </RouterView>
       </div>
@@ -37,10 +37,10 @@ import FloatBtn from './components/FloatBtn.vue'
 import { useRouterStore } from '@/stores/routerStore'
 import LoginModal from './components/LoginModal.vue'
 import { useUserStore } from '@/stores/userStore'
+import type { LocationQuery } from 'vue-router'
 
 const initCacheKeyList = ref(<string[]>[])
 const routerStore = useRouterStore()
-const userStore = useUserStore()
 
 watch(
   () => routerStore.changePageListCount,
@@ -48,6 +48,12 @@ watch(
     initCacheKeyList.value = routerStore.pageList.map((c) => c.cachedPath!)
   },
 )
+
+const getRouterKey = (path: string, query: LocationQuery) => {
+  const data = routerStore.routerList.find((c) => '/' + c.router == path)
+  return routerStore.getRouterKey(data || path, query)
+}
+
 onMounted(() => {})
 </script>
 <style lang="scss" scoped>

@@ -39,7 +39,7 @@ export default function autoRouterList(options: PluginOptions): Plugin {
                 continue;
             }
             const str = fs.readFileSync(c, 'utf-8');
-            const keyList: JGlobalRouterType[] = ['title', 'isMulti', 'sisRenew', 'isMenu', 'isLogin'];
+            const keyList: JGlobalRouterType[] = ['title', 'isMulti', 'isRenew', 'isMenu', 'isLogin', 'secondName'];
             const data: any = keyList.map((k) => {
                 return str.match(new RegExp(`<!--\\s*\\$${k}:(.*?)\\s*-->`))?.[1];
             }).reduce((a, c, i) => {

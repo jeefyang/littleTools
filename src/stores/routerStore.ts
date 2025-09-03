@@ -1,15 +1,17 @@
 import CommonApi from "@/apis/CommonApi";
 import { jFetch } from "@/utils/jFetch";
+import type { ArgumentsType } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { ref, type Ref } from "vue";
-import type { RouteLocationNormalizedLoadedGeneric, Router } from "vue-router";
+import type { LocationQueryRaw, RouteLocationNormalizedLoadedGeneric, Router } from "vue-router";
 
+type CurRouterType = JRouterType & {
+    removeFn?: () => any;
+};
 
 export const useRouterStore = defineStore('router', () => {
     /** 路由列表 */
-    const routerList = ref(<(JRouterType & {
-        removeFn?: () => any;
-    })[]>[]);
+    const routerList = ref(<CurRouterType[]>[]);
     /** 页面组件列表 */
     const views = import.meta.glob('../views/**/*.vue');
     /** 存储页面标签列表key */
@@ -27,6 +29,8 @@ export const useRouterStore = defineStore('router', () => {
     const curPage = ref('');
     /** 页面标签列表数量发生改变的计数器 */
     const changePageListCount = ref(0);
+    const routerToPush = ref(<ArgumentsType<Router['push']>[0]>{});
+
 
     /** 读取页面标签 */
     const loadPages = (): typeof pageList.value => {
@@ -55,7 +59,6 @@ export const useRouterStore = defineStore('router', () => {
 
     /** 初始化 */
     const init = async (router: Router) => {
-        console.log("xxx", router);
         routerList.value.forEach(c => {
             router.removeRoute(`/${c.router}`);
         });
@@ -86,8 +89,6 @@ export const useRouterStore = defineStore('router', () => {
             list.push({ ...item, removeFn: a });
         }
         routerList.value = list;
-        // console.log(router.currentRoute.value);
-        // await router.push("");
     };
 
     const getPath = (route: RouteLocationNormalizedLoadedGeneric) => {
@@ -103,15 +104,68 @@ export const useRouterStore = defineStore('router', () => {
         }
     };
 
+    const getInitCacheKeyList = () => {
+        return pageList.value.map(c => c.cachedPath);
+    };
+
+    const toItemRouter = (item: CurRouterType) => {
+        const query: LocationQueryRaw = {};
+        if (item.isMulti == '1' || item.isRenew == '1') {
+            query.t = new Date().getTime();
+        }
+        routerToPush.value = { path: '/' + item.router, query };
+    };
+
+    const toUrl = (o: { url: string, query?: LocationQueryRaw; }) => {
+        routerToPush.value = { path: o.url, query: o.query || {} };
+    };
+
+    /** 获取路由标签名 */
+    const getRouterTitle = (router: CurRouterType, query: LocationQueryRaw | string) => {
+        const arr = router.title.split('$');
+        if (arr.length == 1) {
+            return arr[0];
+        }
+        if (typeof query == 'string') {
+            return router.title;
+        }
+        return query[arr[1]] || "";
+    };
+
+    /** 获取路由key */
+    const getRouterKey = (router: CurRouterType | string, query: LocationQueryRaw | string) => {
+        if (typeof router == 'string') {
+            return router + '?t=' + ((query as { t: string; })['t'] || "");
+        }
+        let key = '/' + router.router + '?';
+        if (typeof query != 'string' && router?.secondName) {
+            key += router.secondName + '=' + (query[router.secondName] || '') + '&';
+        }
+        return key + `t=${(query as { t: string; })['t']}`;
+    };
+
+
+
     return {
+        /** 可用的路由列表 */
         routerList,
         getView,
         init,
         getPath,
         loadPages,
         savePages,
+        /** 当前页面 */
         curPage,
+        /** 页面列表 */
         pageList,
-        changePageListCount
+        changePageListCount,
+        getInitCacheKeyList,
+        toItemRouter,
+        toUrl,
+        routerToPush,
+        /** 获取路由标签名 */
+        getRouterTitle,
+        /** 获取路由key */
+        getRouterKey
     };
 });

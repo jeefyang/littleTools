@@ -41,6 +41,7 @@ export default function keepAlivePlus(options: PluginOptions = {}): Plugin {
                     }
                 }
                 let target = arr[1].slice(start, end);
+                // 定义变量
                 const propsStr = target.match(/(\n\s*props:\s*{)/);
                 if (propsStr && propsStr[0]) {
                     target = target.replace(propsStr[0], `
@@ -48,10 +49,11 @@ export default function keepAlivePlus(options: PluginOptions = {}): Plugin {
                     initCacheKeyList:[Array],
                     `);
                 }
+                // 追加缓存监听逻辑
                 const watchStr = target.match(/(\n\s*watch.*\()/);
                 if (watchStr && watchStr[0]) {
                     target = target.replace(watchStr[0], `
-
+                        // 追加监听逻辑
                         ${watchStr[0]}
                         ()=>props.initCacheKeyList,(initCacheKeyList)=>{
                                 if(!initCacheKeyList){
@@ -65,7 +67,7 @@ export default function keepAlivePlus(options: PluginOptions = {}): Plugin {
                             },
                             { flush: 'post' },
                         )
-
+                        // 原监听逻辑
                         ${watchStr[0]}
                         `);
                 }

@@ -22,7 +22,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useRouterStore } from '@/stores/routerStore'
-import { useRouter } from 'vue-router'
+import { useRouter, type LocationQueryRaw } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 
 const routerStore = useRouterStore()
@@ -53,11 +53,7 @@ const logoutFn = async () => {
 }
 
 const toUrl = (item: (typeof routerStore.routerList)[number]) => {
-  if (item.isMulti == '1' || item.isRenew == '1') {
-    router.push({ path: '/' + item.router, query: { t: new Date().getTime() } })
-  } else {
-    router.push({ path: '/' + item.router })
-  }
+  routerStore.toItemRouter(item)
   modelShow.value = false
 }
 </script>

@@ -25,7 +25,6 @@ const router = createRouter({
  */
 let isInit = false;
 router.beforeEach(async (to, from, next) => {
-    console.log(to, from);
     if (!isInit) {
         useUserStore();
         isInit = true;

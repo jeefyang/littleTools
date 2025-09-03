@@ -44,15 +44,22 @@ const menuList: { key: string; label: string }[] = [
   { key: 'closeOther', label: '关闭其他' },
 ]
 
+watch(
+  () => routerStore.routerToPush,
+  (v) => {
+    router.push(v)
+  },
+)
+
 const menuSelectFn = (e: string) => {
   switch (e) {
     case 'close':
       var index = routerStore.pageList.findIndex((c) => c.path == routerStore.curPage)
       if (index >= 1) {
-        router.push({
+        routerStore.routerToPush = {
           path: routerStore.pageList[index - 1].path,
           query: routerStore.pageList[index - 1].query,
-        })
+        }
         routerStore.pageList.splice(index, 1)
       }
       break
@@ -70,7 +77,10 @@ const menuSelectFn = (e: string) => {
       }
       break
     case 'closeAll':
-      router.push({ path: routerStore.pageList[0].path, query: routerStore.pageList[0].query })
+      routerStore.routerToPush = {
+        path: routerStore.pageList[0].path,
+        query: routerStore.pageList[0].query,
+      }
       routerStore.pageList = [routerStore.pageList[0]]
       break
     case 'closeOther':
@@ -86,15 +96,14 @@ const menuSelectFn = (e: string) => {
 
 /** 改变选中的页面 */
 const changePageFn = (e: string | number) => {
-  console.log('change')
   const index = routerStore.pageList.findIndex((c) => c.cachedPath == e)
   if (index == -1) {
     return
   }
-  router.push({
+  routerStore.routerToPush = {
     path: routerStore.pageList[index].path,
     query: routerStore.pageList[index].query || {},
-  })
+  }
 }
 
 /** 关闭页面 */
@@ -104,7 +113,7 @@ const closePageFn = (e: string | number) => {
     return
   }
   const prev = routerStore.pageList[index - 1]
-  router.push({ path: prev.path, query: prev.query || {} })
+  routerStore.routerToPush = { path: prev.path, query: prev.query || {} }
   routerStore.pageList.splice(index, 1)
   routerStore.savePages()
   routerStore.changePageListCount++
@@ -120,19 +129,21 @@ watch(
     const data = routerStore.routerList.find((c) => '/' + c.router == path)
     // 没有找到路由
     if (!data) {
+      console.warn('没有找到路由')
       return
     }
-    const cachedPath = `${path}?t=${(query as { t: string })['t']}`
+    const cachedPath = routerStore.getRouterKey(data, query)
     routerStore.curPage = cachedPath
     document.title = data.title
     const index = routerStore.pageList.findIndex((c) => c.cachedPath == cachedPath)
     // 已经存在
     if (index != -1) {
       routerStore.pageList[index].fullPath = fullPath as string
+      routerStore.pageList[index].title = routerStore.getRouterTitle(data, query).toString()
       return
     }
     const newItem: (typeof routerStore.pageList)[number] = {
-      title: data.title,
+      title: routerStore.getRouterTitle(data, query).toString(),
       path: path as string,
       query: <any>route.query || {},
       fullPath: fullPath as string,

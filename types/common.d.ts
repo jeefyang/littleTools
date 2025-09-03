@@ -13,6 +13,8 @@ type JRouterType = {
     isMenu: string;
     /** 是否需要登录 */
     isLogin: string;
+    /** 第二名称,也用于多开 */
+    secondName: string;
 };
 
 type IsOptional<T, K extends keyof T> = undefined extends T[K] ? true : false;
