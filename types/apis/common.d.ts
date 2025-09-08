@@ -11,13 +11,16 @@ type JHeaderType = {
     authKey?: string;
 };
 
-type JResposeType<T extends { from: any, to: any; } = { from: any, to: any; }> = {
+type JResposeType<T extends { to?: any; } = {}> = undefined extends T['to'] ? {
+    code: number;
+    msg: string;
+} : {
     code: number;
     data: T['to'];
     msg: string;
 };
 
-type JFetchApiType<T extends { from?: any, to: any; }> = undefined extends T['from'] ? (data?: T['from']) => Promise<JResposeType<T>> : (data: T['from']) => Promise<JResposeType<T>>;
+type JFetchApiType<T extends { from?: any, to?: any; }> = undefined extends T['from'] ? (data?: T['from']) => Promise<JResposeType<T>> : (data: T['from']) => Promise<JResposeType<T>>;
 
 interface RouterListApi {
     from?: {};

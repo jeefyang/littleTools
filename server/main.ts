@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import session from "express-session";
 import { userApis } from "./apis/user";
+import { UtilsApis } from "./apis/utils";
 import { KnexDB } from "./knex_db";
 import { cryptoUtil } from "./utils/cryptoUtil";
 
@@ -123,6 +124,7 @@ export class Main {
         });
         // 其他接口
         userApis.bind(this)();
+        UtilsApis.bind(this)();
 
         // 没有接口
         this.app.get("/api/{*splat}", (req, res) => {

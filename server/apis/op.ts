@@ -1,12 +1,10 @@
 import { Main } from "../main";
 import { cryptoUtil } from "../utils/cryptoUtil";
+import { Base } from "./class/base";
 
 export function OPApis(this: Main) {
-    const apiName = 'op';
-    const getUrl = (url: string) => {
-        return process.env.VITE_API_BASE_URL + apiName + url;
-    };
-    this.appPost(getUrl('/pageList'), async (req, res) => {
+    const base = new Base("op");
+    this.appPost(base.getUrl('/pageList'), async (req, res) => {
         const { username, password } = req.body as UserApiLogin['from'];
         const u = await this.db.where("users", { username });
         if (!u || u.length == 0) {
