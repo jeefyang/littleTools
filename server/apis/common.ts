@@ -5,10 +5,9 @@ import fs from 'fs';
 import { cryptoUtil } from "@server/utils/cryptoUtil";
 
 export function commonApis(this: Main) {
-
     const base = new Base("", CommonApiUrls);
-    const decode_routerList = base.decode.routerList;
 
+    const decode_routerList = base.decode.routerList;
     this.appGet(decode_routerList.url, async (req, res) => {
         const j: { [x: string]: JRouterType; } = eval(`(${fs.readFileSync(`${process.env.VITE_PRIVATE_RES_DIR}/router.json`)})`);
         const { token } = req.headers as JHeaderType;

@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 
 export function UtilsApis(this: Main) {
     const base = new Base('utils', UtilsApiUrls);
+
     const decode_nanoid = base.decode.nanoid;
     this.appGet(decode_nanoid.url, async (req, res) => {
         const j = decode_nanoid.getResult({
