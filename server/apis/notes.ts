@@ -1,6 +1,6 @@
 import { Main } from "../main";
 import { Base } from "./class/base";
-import { NotesApiUrls } from "@common/apis/NotesApis";
+import { NotesApiUrls } from "@common/apis/notes";
 
 
 export function NotesApis(this: Main) {
