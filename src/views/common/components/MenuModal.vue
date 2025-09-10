@@ -44,7 +44,7 @@ const modelShow = computed({
 })
 
 const routerList = computed(() => {
-  return routerStore.routerList.filter((c) => c.isMenu)
+  return routerStore.routerList.filter((c) => c.isMenu == '1')
 })
 
 const logoutFn = async () => {

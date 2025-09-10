@@ -26,3 +26,5 @@ interface RouterListApi {
     from?: {};
     to: { [x: string]: JRouterType; };
 }
+
+type HttpMethod = "GET" | "POST";

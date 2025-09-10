@@ -134,12 +134,13 @@ watch(
     }
     const cachedPath = routerStore.getRouterKey(data, query)
     routerStore.curPage = cachedPath
-    document.title = data.title
+    const title = routerStore.getRouterTitle(data, query).toString()
+    document.title = title
     const index = routerStore.pageList.findIndex((c) => c.cachedPath == cachedPath)
     // 已经存在
     if (index != -1) {
       routerStore.pageList[index].fullPath = fullPath as string
-      routerStore.pageList[index].title = routerStore.getRouterTitle(data, query).toString()
+      routerStore.pageList[index].title = title
       return
     }
     const newItem: (typeof routerStore.pageList)[number] = {

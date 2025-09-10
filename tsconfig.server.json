@@ -9,11 +9,21 @@
         "esModuleInterop": true,
         "strict": true,
         "moduleResolution": "node",
-        "noEmit": true
+        "noEmit": true,
+        "baseUrl": "./",
+        "paths": {
+            "@apis/*": [
+                "src/apis/*"
+            ],
+            "@server/*": [
+                "server/*"
+            ]
+        }
     },
     "include": [
         "env.d.ts",
         "server/**/*.ts",
+        "src/apis/**/*.ts",
         "./types/**/*"
     ],
     "exclude": [

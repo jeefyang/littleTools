@@ -1,12 +1,14 @@
 import { Main } from "../main";
 import { cryptoUtil } from "../utils/cryptoUtil";
 import { Base } from "./class/base";
+import { UserApiUrls } from "@apis/UserApis";
 
 export function userApis(this: Main) {
-    const base = new Base('user');
+    const base = new Base('user', UserApiUrls);
 
-    this.appPost(base.getUrl('/login'), async (req, res) => {
-        const { username, password } = req.body as UserApiLogin['from'];
+    const decode_login = base.decode.login;
+    this.appPost(decode_login.url, async (req, res) => {
+        const { username, password } = decode_login.getBody(req);
         const u = await this.db.where("users", { username });
         if (!u || u.length == 0) {
             return res.status(401).json({
@@ -23,8 +25,7 @@ export function userApis(this: Main) {
             });
         }
         const token = cryptoUtil.generateToken({ id: user.id, username: user.username });
-        const j: JResposeType<UserApiLogin> = {
-            code: 200,
+        const j = decode_login.getResult({
             msg: "登录成功",
             data: {
                 token,
@@ -32,7 +33,7 @@ export function userApis(this: Main) {
                 email: user.email
 
             }
-        };
+        });
         return res.status(200).json(j);
     });
 }

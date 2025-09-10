@@ -40,7 +40,4 @@ export function jFetch(o: { method: "GET" | "POST", url: string, data?: any; }):
             rej(e);
         });
     });
-
-
-
 }

@@ -1,5 +1,6 @@
-import CommonApi from "@/apis/CommonApi";
-import { jFetch } from "@/utils/jFetch";
+
+
+import { CommonApis } from "@/apis/tools/ApisList";
 import type { ArgumentsType } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { ref, type Ref } from "vue";
@@ -64,7 +65,7 @@ export const useRouterStore = defineStore('router', () => {
         });
         const res: {
             data: { [x in string]: typeof routerList.value[number] };
-        } = await CommonApi.routerList();
+        } = await CommonApis.routerList();
         const list: typeof routerList.value = [];
         for (let key in res.data) {
             const item = res.data[key];

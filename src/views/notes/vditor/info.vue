@@ -5,18 +5,22 @@
   <!-- $secondName:name -->
 
   <!-- -->
-  <n-button @click="toCreate">新建</n-button>
+  <div ref="divRef" class="box"></div>
 </template>
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouterStore } from '@/stores/routerStore'
-import UtilsApi from '@/apis/UtilsApi'
 import { useMessage } from 'naive-ui'
 import { useRoute } from 'vue-router'
+import Vditor from 'vditor'
+// import '~vditor/src/assets/less/index'
+import { UtilsApis } from '@/apis/tools/ApisList'
 
 const routerStore = useRouterStore()
 const message = useMessage()
 const route = useRoute()
+
+const divRef = ref<HTMLDivElement>()
 
 const id = route.query.id || ''
 const name = route.query.name || ''
@@ -27,7 +31,7 @@ onMounted(() => {
   }
 })
 const toCreate = async () => {
-  const res = await UtilsApi.nanoid()
+  const res = await UtilsApis.nanoid()
   console.log(res)
   if (res.code != 200) {
     message.error(res.msg)

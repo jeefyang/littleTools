@@ -7,13 +7,13 @@
 <script setup lang="ts">
 import { onUnmounted } from 'vue'
 import { useRouterStore } from '@/stores/routerStore'
-import UtilsApi from '@/apis/UtilsApi'
 import { useMessage } from 'naive-ui'
+import { UtilsApis } from '@/apis/tools/ApisList'
 
 const routerStore = useRouterStore()
 const message = useMessage()
 const toCreate = async () => {
-  const res = await UtilsApi.nanoid()
+  const res = await UtilsApis.nanoid()
   console.log(res)
   if (res.code != 200) {
     message.error(res.msg)

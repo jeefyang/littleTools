@@ -24,7 +24,7 @@
   </n-modal>
 </template>
 <script lang="ts" setup>
-import UserApi from '@/apis/UserApi'
+import { UserApis } from '@/apis/tools/ApisList'
 import { useRouterStore } from '@/stores/routerStore'
 import { useUserStore } from '@/stores/userStore'
 import { saveKeyStorage } from '@/utils/storage'
@@ -47,7 +47,7 @@ const model = reactive<UserApiLogin['from']>({
 const submit = async () => {
   await formRef.value!.validate()
 
-  UserApi.login(model).then((res) => {
+  UserApis.login(model).then((res) => {
     if (res.code != 200) {
       return message.error(res.msg)
     }

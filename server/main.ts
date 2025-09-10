@@ -2,11 +2,10 @@ import path from "path";
 import fs from "fs";
 import express from "express";
 import cors from "cors";
-import session from "express-session";
 import { userApis } from "./apis/user";
 import { UtilsApis } from "./apis/utils";
 import { KnexDB } from "./knex_db";
-import { cryptoUtil } from "./utils/cryptoUtil";
+import { commonApis } from "./apis/common";
 
 // 定义错误接口
 interface AppError extends Error {
@@ -109,19 +108,8 @@ export class Main {
         });
 
         // 路由列表
-        this.app.get("/api/routerList", (req, res) => {
-            const j: { [x: string]: JRouterType; } = eval(`(${fs.readFileSync(`${process.env.VITE_PRIVATE_RES_DIR}/router.json`)})`);
-            const { token } = req.headers as JHeaderType;
-            if (!token || !cryptoUtil.verifyToken(token)) {
-                for (let key in j) {
-                    if (j[key].isLogin != "1") {
-                        continue;
-                    }
-                    delete j[key];
-                }
-            }
-            res.json({ code: 200, msg: "操作成功", data: j });
-        });
+        commonApis.bind(this)();
+
         // 其他接口
         userApis.bind(this)();
         UtilsApis.bind(this)();

@@ -1,37 +1,13 @@
 import { Main } from "../main";
 import { cryptoUtil } from "../utils/cryptoUtil";
 import { Base } from "./class/base";
+import { OPApiUrls } from "@apis/OPApis";
 
 export function OPApis(this: Main) {
-    const base = new Base("op");
-    this.appPost(base.getUrl('/pageList'), async (req, res) => {
-        const { username, password } = req.body as UserApiLogin['from'];
-        const u = await this.db.where("users", { username });
-        if (!u || u.length == 0) {
-            return res.status(401).json({
-                code: 401,
-                msg: "用户不存在"
-            });
-        }
-        const user = u[0];
-        const isValid = cryptoUtil.comparePassword(password, user.password);
-        if (!isValid) {
-            return res.status(401).json({
-                code: 401,
-                msg: "密码错误"
-            });
-        }
-        const token = cryptoUtil.generateToken({ id: user.id, username: user.username });
-        const j: JResposeType<UserApiLogin> = {
-            code: 200,
-            msg: "登录成功",
-            data: {
-                token,
-                username: user.username,
-                email: user.email
-
-            }
-        };
+    const base = new Base("op", OPApiUrls);
+    const decode_pageList = base.decode.pageList;
+    this.appPost(decode_pageList.url, async (req, res) => {
+        const j = decode_pageList.getResult({});
         return res.status(200).json(j);
     });
 }

@@ -47,7 +47,8 @@ export default defineConfig(({ mode }) => {
                 "knexfile.mjs": path.resolve(__dirname, "knexfile.mjs"),
                 "@project": path.resolve(__dirname),
                 "@src": path.resolve(__dirname, "src"),
-                "@server": path.resolve(__dirname, "server")
+                "@server": path.resolve(__dirname, "server"),
+                "@apis": path.resolve(__dirname, "src/apis"),
             }
         }
     };
