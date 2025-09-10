@@ -1,6 +1,6 @@
 import { Main } from "../main";
 import { Base } from "./class/base";
-import { OPApiUrls } from "@common/apis/OPApis";
+import { OPApiUrls } from "@common/apis/op";
 
 export function OPApis(this: Main) {
     const base = new Base("op", OPApiUrls);

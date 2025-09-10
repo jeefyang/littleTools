@@ -1,4 +1,4 @@
-import { UtilsApiUrls } from "@common/apis/UtilsApis";
+import { UtilsApiUrls } from "@common/apis/utils";
 import { Main } from "../main";
 import { Base } from "./class/base";
 import { nanoid } from "nanoid";
