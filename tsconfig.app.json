@@ -4,7 +4,8 @@
         "env.d.ts",
         "src/**/*",
         "src/**/*.vue",
-        "./types/**/*"
+        "./types/**/*",
+        "common/**/*"
     ],
     "exclude": [
         "src/**/__tests__/*"
@@ -19,6 +20,9 @@
         "paths": {
             "@/*": [
                 "./src/*"
+            ],
+            "@common/*": [
+                "./common/*"
             ],
         }
     }

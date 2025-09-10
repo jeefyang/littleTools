@@ -1,7 +1,7 @@
-import { CommonApiUrls } from "../CommonApis";
-import { OPApiUrls } from "../OPApis";
-import { UserApiUrls } from "../UserApis";
-import { UtilsApiUrls } from "../UtilsApis";
+import { CommonApiUrls } from "@common/apis/CommonApis";
+import { OPApiUrls } from "@common/apis/OPApis";
+import { UserApiUrls } from "@common/apis/UserApis";
+import { UtilsApiUrls } from "@common/apis/UtilsApis";
 import { apisTrans } from "./apisTrans";
 
 export const CommonApis = apisTrans(CommonApiUrls);

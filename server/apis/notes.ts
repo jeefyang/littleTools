@@ -1,9 +1,9 @@
 import { Main } from "../main";
 import { Base } from "./class/base";
-import { OPApiUrls } from "@common/apis/OPApis";
+
 
 export function OPApis(this: Main) {
-    const base = new Base("op", OPApiUrls);
+    const base = new Base("op", note);
     const decode_pageList = base.decode.pageList;
     this.appPost(decode_pageList.url, async (req, res) => {
         const j = decode_pageList.getResult({});

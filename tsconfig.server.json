@@ -12,8 +12,8 @@
         "noEmit": true,
         "baseUrl": "./",
         "paths": {
-            "@apis/*": [
-                "src/apis/*"
+            "@common/*": [
+                "common/*"
             ],
             "@server/*": [
                 "server/*"
@@ -23,8 +23,11 @@
     "include": [
         "env.d.ts",
         "server/**/*.ts",
-        "src/apis/**/*.ts",
-        "./types/**/*"
+        "common/**/*.ts",
+        "./types/**/*",
+        "src/apis/ApisList.ts",
+        "common/apis/tools/apiUrlsTrans.ts",
+        "src/apis/apisTrans.ts"
     ],
     "exclude": [
         "node_modules"

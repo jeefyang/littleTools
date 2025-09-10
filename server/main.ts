@@ -162,27 +162,39 @@ export class Main {
 
     // @ts-ignore
     readonly appGet: typeof this.app.get = (...args: Parameters<typeof this.app.get>) => {
-        const c = args[0];
-        if (Array.isArray(c)) {
-            c.forEach(cc => {
-                this.routerList.push({ path: cc, method: "get" });
-            });
+
+        try {
+            const c = args[0];
+            if (Array.isArray(c)) {
+                c.forEach(cc => {
+                    this.routerList.push({ path: cc, method: "get" });
+                });
+            }
+            return this.app.get(...args);
         }
-        return this.app.get(...args);
+        catch (e) {
+            console.error(e);
+        }
+
+
     };
 
 
 
     // @ts-ignore
     readonly appPost: typeof this.app.post = (...args: Parameters<typeof this.app.post>) => {
-        const c = args[0];
-        const b = args[1];
-        if (Array.isArray(c)) {
-            c.forEach(cc => {
-                this.routerList.push({ path: cc, method: "post" });
-            });
+        try {
+            const c = args[0];
+            if (Array.isArray(c)) {
+                c.forEach(cc => {
+                    this.routerList.push({ path: cc, method: "post" });
+                });
+            }
+            return this.app.post(...args);
         }
-        return this.app.post(...args);
+        catch (e) {
+            console.error(e);
+        }
     };
 
 

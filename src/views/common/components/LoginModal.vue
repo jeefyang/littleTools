@@ -24,7 +24,7 @@
   </n-modal>
 </template>
 <script lang="ts" setup>
-import { UserApis } from '@/apis/tools/ApisList'
+import { UserApis } from '../../../apis/ApisList'
 import { useRouterStore } from '@/stores/routerStore'
 import { useUserStore } from '@/stores/userStore'
 import { saveKeyStorage } from '@/utils/storage'

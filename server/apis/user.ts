@@ -1,7 +1,7 @@
 import { Main } from "../main";
 import { cryptoUtil } from "../utils/cryptoUtil";
 import { Base } from "./class/base";
-import { UserApiUrls } from "@apis/UserApis";
+import { UserApiUrls } from "@common/apis/UserApis";
 
 export function userApis(this: Main) {
     const base = new Base('user', UserApiUrls);

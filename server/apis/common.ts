@@ -1,4 +1,4 @@
-import { CommonApiUrls } from "@apis/CommonApis";
+import { CommonApiUrls } from "@common/apis/CommonApis";
 import { Main } from "../main";
 import { Base } from "./class/base";
 import fs from 'fs';

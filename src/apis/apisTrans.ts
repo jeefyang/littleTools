@@ -1,11 +1,5 @@
-import { jFetch } from "../../utils/jFetch";
+import { jFetch } from "@/utils/jFetch";
 
-
-type ApiReturnType<T extends { from?: any, to?: any; }, D extends { [x in string]: {
-    url: string;
-    method: HttpMethod;
-    type: T;
-} }> = { [x in keyof D]: JFetchApiType<D[x]["type"]> };
 
 export function apisTrans<T extends { from?: any, to?: any; }, D extends { [x in string]: {
     url: string;

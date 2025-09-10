@@ -48,7 +48,7 @@ export default defineConfig(({ mode }) => {
                 "@project": path.resolve(__dirname),
                 "@src": path.resolve(__dirname, "src"),
                 "@server": path.resolve(__dirname, "server"),
-                "@apis": path.resolve(__dirname, "src/apis"),
+                "@common": path.resolve(__dirname, "common"),
             }
         }
     };

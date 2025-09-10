@@ -1,6 +1,6 @@
 
 
-import { CommonApis } from "@/apis/tools/ApisList";
+import { CommonApis } from "../apis/ApisList";
 import type { ArgumentsType } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { ref, type Ref } from "vue";

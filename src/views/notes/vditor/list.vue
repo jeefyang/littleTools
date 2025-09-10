@@ -8,7 +8,7 @@
 import { onUnmounted } from 'vue'
 import { useRouterStore } from '@/stores/routerStore'
 import { useMessage } from 'naive-ui'
-import { UtilsApis } from '@/apis/tools/ApisList'
+import { UtilsApis } from '../../../apis/ApisList'
 
 const routerStore = useRouterStore()
 const message = useMessage()
