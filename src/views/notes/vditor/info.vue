@@ -44,7 +44,19 @@ onMounted(() => {
       },
     },
     upload: {
-      url: 'api/upload?type=markdown&uuid',
+      url: `api/upload?type=markdown&uuid=${uuid}`,
+      validate(files) {
+        return true
+      },
+      handler(file) {
+        return new Promise((resolve, _reject) => {
+          const reader = new FileReader()
+          reader.readAsDataURL(file[0])
+          reader.onload = () => {
+            resolve(reader.result as string)
+          }
+        }) as Promise<string>
+      },
     },
     toolbar: [
       'emoji',
