@@ -4,14 +4,16 @@
  * @returns { Promise<void> }
  */
 export const up = async (knex) => {
-    return knex.schema.createTable('vditor_list', (table) => {
+    return knex.schema.createTable('markdowns', (table) => {
         table.increments('id').primary();
         table.text("uuid").notNullable().unique();
         table.integer("createDate").notNullable();
         table.integer("fixDate").notNullable();
-        table.text("tags")
         table.text("name").notNullable()
+        table.text("tags")
         table.text("desc")
+        table.text("type")
+        table.text("other")
         table.timestamps(true, true);
     });
 };
@@ -21,6 +23,6 @@ export const up = async (knex) => {
  * @returns { Promise<void> }
  */
 export const down = async (knex) => {
-    return knex.schema.dropTable('vditor_list');
+    return knex.schema.dropTable('markdowns');
 
 };

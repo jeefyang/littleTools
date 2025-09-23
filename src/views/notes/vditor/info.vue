@@ -2,7 +2,7 @@
   <!-- $title:$name -->
   <!-- $isMulti:1 -->
   <!-- $isMenu:0 -->
-  <!-- $secondName:name -->
+  <!-- $secondName:uuid -->
 
   <!-- -->
   <div ref="divRef" class="box"></div>
@@ -13,7 +13,7 @@ import { useRouterStore } from '@/stores/routerStore'
 import { useMessage } from 'naive-ui'
 import { useRoute } from 'vue-router'
 import Vditor from 'vditor'
-import 'vditor'
+// import 'vditor'
 import '@/assets/vditor/less/index.less'
 import { UtilsApis } from '../../../apis/ApisList'
 
@@ -23,16 +23,16 @@ const route = useRoute()
 
 const divRef = ref<HTMLDivElement>()
 
-const id = (route.query.id || '') as string
+const uuid = (route.query.uuid || '') as string
 const name = (route.query.name || '') as string
 
 onMounted(() => {
-  if (!id) {
+  if (!uuid) {
     message.error('无法找到页面')
   }
   console.time('vditor')
   const v = new Vditor(divRef.value!, {
-    cache: { enable: true, id: id },
+    cache: { enable: true, id: uuid },
     height: '100%',
     after: () => {
       console.timeEnd('vditor')
@@ -43,9 +43,57 @@ onMounted(() => {
         current: 'dark',
       },
     },
-    upload: {},
+    upload: {
+      url: 'api/upload?type=markdown&uuid',
+    },
+    toolbar: [
+      'emoji',
+      'headings',
+      'bold',
+      'italic',
+      'strike',
+      'link',
+      '|',
+      'list',
+      'ordered-list',
+      'check',
+      'outdent',
+      'indent',
+      '|',
+      'quote',
+      'line',
+      'code',
+      'inline-code',
+      'insert-before',
+      'insert-after',
+      '|',
+      'upload',
+      'record',
+      'table',
+      '|',
+      'undo',
+      'redo',
+      '|',
+      'fullscreen',
+      'edit-mode',
+      {
+        name: 'more',
+        toolbar: [
+          'both',
+          'code-theme',
+          'content-theme',
+          'export',
+          'outline',
+          'preview',
+          'devtools',
+          'info',
+          'help',
+        ],
+      },
+    ],
   })
 })
+
 const toCreate = async () => {
   const res = await UtilsApis.nanoid()
   console.log(res)

@@ -8,9 +8,10 @@ export function UtilsApis(this: Main) {
 
     const decode_nanoid = base.decode.nanoid;
     this.appGet(decode_nanoid.url, async (req, res) => {
+        const query = decode_nanoid.getQuery(req);
         const j = decode_nanoid.getResult({
             data: {
-                id: nanoid(48)
+                id: nanoid(parseInt(query?.len?.toString() || '24'))
 
             }
         });

@@ -13,7 +13,7 @@ import { UtilsApis } from '../../../apis/ApisList'
 const routerStore = useRouterStore()
 const message = useMessage()
 const toCreate = async () => {
-  const res = await UtilsApis.nanoid()
+  const res = await UtilsApis.nanoid({ len: 64 })
   console.log(res)
   if (res.code != 200) {
     message.error(res.msg)
@@ -21,7 +21,7 @@ const toCreate = async () => {
 
   routerStore.toUrl({
     url: '/notes/vditor/info',
-    query: { id: res.data.id, name: '新建笔记1' },
+    query: { uuid: res.data.id, name: '新建笔记1' },
   })
 }
 </script>

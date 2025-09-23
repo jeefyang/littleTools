@@ -5,6 +5,7 @@ type DecodeType<T extends { from?: any, to?: any; }> = {
     type: T;
     /**  */
     getBody: (req: any) => T['from'];
+    getQuery: (req: any) => T['from'];
     getResult: (o: Partial<JResposeType<T>>) => JResposeType<T>;
 
 };
@@ -30,6 +31,9 @@ export class Base<T extends { from?: any, to?: any; }, D extends { [x in string]
                 type: api.type,
                 getBody: (req) => {
                     return req.body;
+                },
+                getQuery: (req) => {
+                    return req.query;
                 },
                 getResult: (o) => {
                     return {
