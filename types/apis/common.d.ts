@@ -8,7 +8,7 @@ type ApiReturnType<T extends { from?: any, to?: any; }, D extends { [x in string
 
 type JHeaderType = {
     /** 请求方式 */
-    'Content-Type': string;
+    'Content-Type'?: string;
     /** token */
     token?: string;
     /** 路径 */

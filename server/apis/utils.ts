@@ -15,6 +15,6 @@ export function UtilsApis(this: Main) {
 
             }
         });
-        return res.status(200).json(j);
+        return res.status(base.statusMap.success).json(j);
     });
 }

@@ -13,7 +13,7 @@ import { UtilsApis } from '../../../apis/ApisList'
 const routerStore = useRouterStore()
 const message = useMessage()
 const toCreate = async () => {
-  const res = await UtilsApis.nanoid({ len: 64 })
+  const res = await UtilsApis.nanoid({ len: 24 })
   console.log(res)
   if (res.code != 200) {
     message.error(res.msg)
@@ -22,6 +22,10 @@ const toCreate = async () => {
   routerStore.toUrl({
     url: '/notes/vditor/info',
     query: { uuid: res.data.id, name: '新建笔记1' },
+  })
+
+  onUnmounted(() => {
+    console.log('unmounted')
   })
 }
 </script>

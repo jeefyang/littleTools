@@ -18,3 +18,6 @@ type JRouterType = {
 };
 
 type IsOptional<T, K extends keyof T> = undefined extends T[K] ? true : false;
+
+type FirstParameterCustom<T extends (...args: any) => any> =
+    T extends (first: infer P, ...rest: any[]) => any ? P : never;

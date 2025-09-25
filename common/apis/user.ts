@@ -4,7 +4,9 @@ const headerUrl = "user/";
 
 
 export const UserApiUrls = apiUrlsTrans(headerUrl, {
-    login: { method: 'POST', type: {} as UserApiLogin }
+    login: { method: 'POST', type: {} as UserApiLogin },
+
+    getPrivateResToken: { method: "GET", type: {} as userApiGetPrivateResToken }
 });
 
 

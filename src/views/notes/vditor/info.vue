@@ -16,6 +16,7 @@ import Vditor from 'vditor'
 // import 'vditor'
 import '@/assets/vditor/less/index.less'
 import { UtilsApis } from '../../../apis/ApisList'
+import { jFetch, jFetchFormdata } from '@/utils/jFetch'
 
 const routerStore = useRouterStore()
 const message = useMessage()
@@ -44,18 +45,22 @@ onMounted(() => {
       },
     },
     upload: {
-      url: `api/upload?type=markdown&uuid=${uuid}`,
-      validate(files) {
+      fieldName: 'file',
+      validate(file) {
+        console.log(file)
         return true
       },
-      handler(file) {
-        return new Promise((resolve, _reject) => {
-          const reader = new FileReader()
-          reader.readAsDataURL(file[0])
-          reader.onload = () => {
-            resolve(reader.result as string)
-          }
-        }) as Promise<string>
+      async handler(file) {
+        console.log('handler')
+        const formdata = new FormData()
+        console.log(file[0])
+        formdata.append('file', file[0])
+        const res = await jFetchFormdata({
+          url: `upload?type=markdown&uuid=${uuid}`,
+          formdata: formdata,
+        })
+        console.log(res)
+        return 'xx'
       },
     },
     toolbar: [

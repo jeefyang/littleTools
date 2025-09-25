@@ -6,6 +6,9 @@ import { userApis } from "./apis/user";
 import { UtilsApis } from "./apis/utils";
 import { KnexDB } from "./knex_db";
 import { commonApis } from "./apis/common";
+import { uploadApis } from "./apis/upload";
+import { nanoid } from "nanoid";
+import { scheduleJob } from "node-schedule";
 
 // 定义错误接口
 interface AppError extends Error {
@@ -23,7 +26,10 @@ export class Main {
     readonly app = express();
     configData: { port: number; } | null = null;
     readonly db = new KnexDB();
+    /** 路由列表,暂无用处,计划用来观察路由数据 */
     routerList: { path: string | RegExp, method: "get" | 'post'; }[] = [];
+    /** 私有资源token列表 */
+    privateResToken: string[] = [];
 
     constructor() {
         if (!fs.existsSync(this.jsonUrl)) {
@@ -42,12 +48,19 @@ export class Main {
         if (!this.configData) {
             return;
         }
+        // this.app.use(express.json({ limit: '1024mb' })); // 支持 1GB 以上的 JSON 请求体
+        this.app.use(express.urlencoded({ limit: '1024mb', extended: true })); // 支持 1GB 以上的表单请求体
+
+        this.privateResToken = new Array(3).map(() => nanoid(8));
+        scheduleJob('0 3 * * *', async () => {
+            this.privateResToken.push(nanoid(8));
+            this.privateResToken.pop();
+        });
 
         await this.db.init();
         this.setPlugin();
         this.setCapture();
         this.setApi();
-        this.setRes();
         await this.setVue();
 
         // 开发模式下,启动 vite 服务
@@ -107,8 +120,11 @@ export class Main {
             res.json({ code: 200, msg: "hello world!!!", data: process.env.VITE_NODE_ENV });
         });
 
-        // 路由列表
+        // 公共列表
         commonApis.bind(this)();
+
+        // 上传接口
+        uploadApis.bind(this)();
 
         // 其他接口
         userApis.bind(this)();
@@ -120,16 +136,7 @@ export class Main {
         });
     }
 
-    /** 设置静态资源目录 */
-    setRes() {
-        // 静态资源目录
-        this.app.get("/res/{*splat}", (req, res) => {
-            const splat: string[] = (<any>req.params).splat;
-            res.sendFile(path.resolve(path.join('./res', splat.join('/'))), (e) => {
-                e && res.sendStatus(404);
-            });
-        });
-    }
+
 
     /** 设置vue路由 */
     async setVue() {

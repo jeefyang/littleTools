@@ -12,3 +12,9 @@ interface UserApiLogin {
         username: string;
     };
 }
+
+interface userApiGetPrivateResToken {
+    to: {
+        token: string;
+    };
+}

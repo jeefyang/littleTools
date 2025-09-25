@@ -10,6 +10,35 @@ export const useUserStore = defineStore('user', () => {
     const userInfo = ref<Partial<UserApiLogin['to']> & {}>({});
     /** 登录更新计时器 */
     const isUpdateLoginCount = ref(0);
+    const loginEventList: { fn: () => void, id: string; }[] = [];
+
+    /** 添加监听登录事件 */
+    const addListenLoginEvent = (fn: () => void, id?: string) => {
+        if (id) {
+            const index = loginEventList.findIndex(item => item.id === id);
+            if (index !== -1) {
+                loginEventList.splice(index, 1);
+            }
+        }
+        else {
+            id = new Date().getTime().toString() + "_" + Math.random().toString(36).substring(2);
+        }
+        loginEventList.push({ fn, id });
+        return id;
+    };
+
+    /** 移除监听登录事件 */
+    const removeLoginEvent = (id: string) => {
+        const index = loginEventList.findIndex(item => item.id === id);
+        if (index !== -1) {
+            loginEventList.splice(index, 1);
+        }
+    };
+
+    /** 触发登录事件 */
+    const dispatchLoginEvent = () => {
+        loginEventList.forEach(item => item.fn());
+    };
 
     /** 登出 */
     const logout = () => {
@@ -27,7 +56,9 @@ export const useUserStore = defineStore('user', () => {
         userInfo,
         logout,
         updateUserInfo,
-        isUpdateLoginCount
+        isUpdateLoginCount,
+        dispatchLoginEvent,
+        addListenLoginEvent
     };
 
 });
