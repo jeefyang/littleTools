@@ -23,9 +23,7 @@ const toCreate = async () => {
     url: '/notes/vditor/info',
     query: { uuid: res.data.id, name: '新建笔记1' },
   })
-
-  onUnmounted(() => {
-    console.log('unmounted')
-  })
 }
+
+onUnmounted(() => {})
 </script>

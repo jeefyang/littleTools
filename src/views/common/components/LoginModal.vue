@@ -54,6 +54,7 @@ const submit = async () => {
     saveKeyStorage('user', res.data)
     userStore.updateUserInfo()
     routerStore.init(router)
+    userStore.dispatchLoginEvent()
     userStore.isShowLogin = false
     userStore.isUpdateLoginCount++
   })
