@@ -4,6 +4,7 @@ import { Base } from "./class/base";
 import fs from 'fs';
 import { cryptoUtil } from "@server/utils/cryptoUtil";
 import path from "path";
+import { commonUtils } from "@common/utils/common";
 
 export function commonApis(this: Main) {
     const base = new Base("", CommonApiUrls);
@@ -26,7 +27,7 @@ export function commonApis(this: Main) {
 
     // 公共资源列表
     // 静态资源目录
-    this.appGet("/res/{*splat}", (req, res) => {
+    this.appGet(process.env.VITE_API_BASE_URL + commonUtils.resBaseUrl + "/{*splat}", (req, res) => {
         const splat: string = (<any>req.params).splat;
         res.sendFile(path.resolve(path.join(process.env.VITE_RES_DIR, splat)), (e) => {
             e && res.sendStatus(base.statusMap.noData);
@@ -34,7 +35,7 @@ export function commonApis(this: Main) {
     });
 
     // 私有资源列表
-    this.appGet("/privateRes/:token/:type/{*splat}", (req, res) => {
+    this.appGet(process.env.VITE_API_BASE_URL + commonUtils.privateResBaseUrl + "/:token/:type/{*splat}", (req, res) => {
         if (!this.privateResToken.includes(req.params.token)) {
             res.sendStatus(base.statusMap.noAuth);
             return;
@@ -46,8 +47,8 @@ export function commonApis(this: Main) {
             res.sendStatus(base.statusMap.noData);
             return;
         }
-        const splat: string = (<any>req.params).splat;
-        res.sendFile(path.resolve(path.join(process.env.VITE_PRIVATE_RES_DIR, req.params.type, splat)), (e) => {
+        const splat: string[] = (<any>req.params).splat;
+        res.sendFile(path.resolve(path.join(process.env.VITE_PRIVATE_RES_DIR, req.params.type, ...splat)), (e) => {
             e && res.sendStatus(base.statusMap.noData);
         });
     });

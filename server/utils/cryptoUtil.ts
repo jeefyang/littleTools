@@ -11,26 +11,26 @@ class CryptoUtil {
     readonly saltCount: number = 10;
     /** 密码盐 */
     salt = bcrypt.genSaltSync(this.saltCount);
-    /** jwt密钥 */
-    jwtSecret: string = "";
-    /** jwt密钥文件路径 */
-    jwtFilePath: string = path.resolve(process.env.VITE_PRIVATE_RES_DIR, "jwt.key");
+    /** jwt公共密钥 */
+    commonSecretKey = "";
+    /** jwt公共密钥文件路径 */
+    commonKeyFilePath: string = path.resolve(process.env.VITE_PRIVATE_RES_DIR, "jwt.key");
     constructor() {
-        this.loadJwtSecret();
+        this.loadCommonSecretKey();
     }
 
-    /** 加载jwt密钥 */
-    loadJwtSecret() {
-        if (!fs.existsSync(this.jwtFilePath)) {
-            this.updateJwtSecret();
+    /** 加载jwt公共密钥 */
+    loadCommonSecretKey() {
+        if (!fs.existsSync(this.commonKeyFilePath)) {
+            this.updateCommonSecretKey();
         }
-        this.jwtSecret = fs.readFileSync(this.jwtFilePath, 'utf-8');
+        this.commonSecretKey = fs.readFileSync(this.commonKeyFilePath, 'utf-8');
     }
 
-    /** 更新jwt密钥 */
-    updateJwtSecret() {
+    /** 更新jwt公共密钥 */
+    updateCommonSecretKey() {
         const secret = crypto.randomBytes(32).toString('hex');
-        fs.writeFileSync(this.jwtFilePath, secret);
+        fs.writeFileSync(this.commonKeyFilePath, secret);
     }
 
     /** 密码加密 */
@@ -44,14 +44,36 @@ class CryptoUtil {
     }
 
     /** 生成jwt函数 */
-    generateToken(data: any, time: jwt.SignOptions['expiresIn'] = "30d") {
-        return jwt.sign(data, this.jwtSecret, { expiresIn: time });
+    generateToken(data: any, other?: {
+        time?: jwt.SignOptions['expiresIn'];
+        key?: string;
+    }) {
+        if (!other) {
+            other = {};
+        }
+        if (!other.time) {
+            other.time = "30d";
+        }
+        if (!other.key) {
+            other.key = this.commonSecretKey;
+        }
+        return jwt.sign(data, other.key, { expiresIn: other.time });
     }
 
-    /** 验证jwt 函数 */
-    verifyToken(token: string) {
+    /** 验证jwt 函数
+     * @returns null为无效token
+     */
+    verifyToken(token: string, other?: {
+        key?: string;
+    }) {
+        if (!other) {
+            other = {};
+        }
+        if (!other.key) {
+            other.key = this.commonSecretKey;
+        }
         try {
-            const decode = jwt.verify(token, this.jwtSecret);
+            const decode = jwt.verify(token, other.key);
             return decode;
         }
         catch (e) {

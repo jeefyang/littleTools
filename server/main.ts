@@ -51,7 +51,8 @@ export class Main {
         // this.app.use(express.json({ limit: '1024mb' })); // 支持 1GB 以上的 JSON 请求体
         this.app.use(express.urlencoded({ limit: '1024mb', extended: true })); // 支持 1GB 以上的表单请求体
 
-        this.privateResToken = new Array(3).map(() => nanoid(8));
+        this.privateResToken = [...new Array(10)].map(() => nanoid(8));
+        console.log(this.privateResToken);
         scheduleJob('0 3 * * *', async () => {
             this.privateResToken.push(nanoid(8));
             this.privateResToken.pop();

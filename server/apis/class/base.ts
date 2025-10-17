@@ -69,6 +69,14 @@ export class Base<T extends { from?: any, to?: any; }, D extends { [x in string]
         return !!cryptoUtil.verifyToken(token);
     }
 
+    /** 快速返回错误状态 */
+    returnStatus(type: keyof typeof this.statusMap, res: any, msg: string) {
+        return res.status(this.statusMap[type]).json({
+            code: this.statusMap[type],
+            msg: msg
+        });
+    }
+
     getUrl(url: string) {
         return process.env.VITE_API_BASE_URL + url;
     }

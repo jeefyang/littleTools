@@ -12,6 +12,11 @@ export const useUserStore = defineStore('user', () => {
     const isUpdateLoginCount = ref(0);
     const loginEventList: { fn: () => void, id: string; }[] = [];
 
+    /** 检测是否已经登录 */
+    const checkIsLogin = () => {
+        return !!userInfo.value.token;
+    };
+
     /** 添加监听登录事件 */
     const addListenLoginEvent = (fn: () => void, id?: string) => {
         if (id) {
@@ -58,7 +63,9 @@ export const useUserStore = defineStore('user', () => {
         updateUserInfo,
         isUpdateLoginCount,
         dispatchLoginEvent,
-        addListenLoginEvent
+        addListenLoginEvent,
+        removeLoginEvent,
+        checkIsLogin
     };
 
 });

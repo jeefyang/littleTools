@@ -3,27 +3,48 @@ import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
 import { nanoid } from "nanoid";
+import { commonUtils } from "@common/utils/common";
+import { Base } from "./class/base";
 
-type uploadFileType = 'markdown';
+
 
 
 export function uploadApis(this: Main) {
+
+    const base = new Base("", {});
+
+
     const fileType: { name: string, list: string[]; }[] = [
         { name: "images", list: ["jpg", 'jpeg', 'png', 'apng', 'webp', 'gif', 'bmp'] },
         { name: "videos", list: ['mp4', 'webm', 'mkv', 'avi'] },
         { name: "musics", list: ['mp3', 'wav', 'm4a', 'ogg', 'flac', 'aac'] }
     ];
-    const getDirPath = (o: {
-        type: uploadFileType;
-        uuid?: string,
-        filename: string;
-    }) => {
-        console.log('getDirPath', o);
+    const getDirPath = (o: UploadFileDataType) => {
         let p = "";
-        if (o.type == 'markdown') {
-            const extname = path.extname(o.filename).slice(1);
-            const folderName = fileType.find(c => c.list.includes(extname))?.name || "others";
-            p = path.join(process.env.VITE_PRIVATE_RES_DIR, 'markdowns', o.uuid || "", folderName);
+        // 普通资源类型
+        if (o.type) {
+            // 白名单写入
+            const whiteList: uploadFileType[] = ['xx'];
+            if (whiteList.includes(o.type)) {
+                p = path.join(process.env.VITE_PRIVATE_RES_DIR, o.type, o.dir || "");
+            }
+
+        }
+        // 私有资源类型
+        else if (o.privateType) {
+            if (o.privateType == 'markdown') {
+                const extname = path.extname(o.filename!).slice(1);
+                const folderName = fileType.find(c => c.list.includes(extname))?.name || "others";
+                p = path.join(process.env.VITE_PRIVATE_RES_DIR, 'markdowns', o.dir || "", folderName);
+            }
+            // 白名单写入
+            else {
+                const whiteList: uploadFilePrivateType[] = [];
+                if (whiteList.includes(o.privateType)) {
+                    p = path.join(process.env.VITE_PRIVATE_RES_DIR, o.privateType, o.dir || "");
+                }
+            }
+
         }
         return p;
 
@@ -31,17 +52,25 @@ export function uploadApis(this: Main) {
     const uploadMulter = multer({
         storage: multer.diskStorage({
             destination: (req, file, cb) => {
-                const { type, uuid } = req.query as { type: uploadFileType, uuid?: string; };
-                const p = getDirPath({ type, uuid, filename: file.originalname });
+                const query = req.query as UploadFileDataType;
+                if (query.privateType) {
+                    // 验证有没有登录
+                    if (!base.verifyToken(req)) {
+                        return base.returnStatus("noAuth", req.res, "登录信息错误");
+                    }
+                }
+                // 解码一下
+                query.dir = decodeURIComponent(query.dir);
+                const p = getDirPath({ ...query, filename: file.originalname });
                 if (!p) {
-                    return cb(new Error(`${type} 上传类型错误`), p);
+                    return base.returnStatus("noData", req.res, `类型 ${query.privateType || query.type} 错误`);
                 }
                 if (!fs.existsSync(p)) {
                     fs.mkdirSync(p, { recursive: true });
                 }
                 cb(null, p);
             },
-            filename(req, file, cb) {
+            filename(_req, file, cb) {
                 const timestamp = Date.now();
                 const ext = path.extname(file.originalname);
                 cb(null, `${timestamp}_${nanoid(6)}${ext}`);
@@ -51,20 +80,23 @@ export function uploadApis(this: Main) {
             fileSize: 1024 * 1024 * 1024 //限制1g
         }
     });
-    this.appPost(process.env.VITE_API_BASE_URL + 'upload', uploadMulter.single('file'), (req, res) => {
-        console.log(req.file);
+    this.appPost(process.env.VITE_API_BASE_URL + commonUtils.uploadBaseUrl, uploadMulter.single('file'), (req, res) => {
+
         if (!req.file) {
-            return res.json({ msg: "上传失败", code: 404 } as JResposeType);
+            return res.json({ msg: "上传失败", code: base.statusMap.noData } as JResposeType);
         }
-        const { type, uuid } = req.query as { type: uploadFileType, uuid?: string; };
-        const p = getDirPath({ type, uuid, filename: req.file.originalname });
-        const absUrl = path.join(p, req.file.filename);
+        const query = req.query as UploadFileDataType;
+        // 解码一下
+        query.dir = decodeURIComponent(query.dir);
+        const p = getDirPath({ ...query, filename: req.file.originalname });
+        const url = path.join(p, req.file.filename);
+        const displayUrl = query.privateType ? path.relative(process.env.VITE_PRIVATE_RES_DIR, url) : query.type ? path.relative(process.env.VITE_RES_DIR, url) : url;
         res.json({
             msg: "上传成功", code: 200, data: {
-                url: path.relative(process.env.VITE_PRIVATE_RES_DIR, absUrl),
-                absUrl,
-                displayUrl: path.relative(path.join(process.env.VITE_PRIVATE_RES_DIR, type + 's', uuid || ""), absUrl)
+                url,
+                displayUrl,
+                filename: req.file.filename
             }
-        } as JResposeType);
+        } as UploadFileReturnType);
     });
 };

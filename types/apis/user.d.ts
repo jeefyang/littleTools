@@ -17,4 +17,7 @@ interface userApiGetPrivateResToken {
     to: {
         token: string;
     };
+    from: {
+        type: string;
+    };
 }

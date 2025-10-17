@@ -1,8 +1,8 @@
 import { useUserStore } from "@/stores/userStore";
-
+import { commonUtils } from "@common/utils/common";
 
 let userStore: ReturnType<typeof useUserStore> | undefined = undefined;
-export function jFetch(o: { method: "GET" | "POST", url: string, data?: any; }): Promise<any> {
+export function jFetch(o: { method: "GET" | "POST", url: string, data?: any; }, other: JFetchOtherType): Promise<any> {
     if (!userStore) {
         userStore = useUserStore();
     }
@@ -30,7 +30,7 @@ export function jFetch(o: { method: "GET" | "POST", url: string, data?: any; }):
             return fetch(o.url);
         })().then(r => {
             if (r.status == 401) {
-                userStore!.isShowLogin = true;
+                !other.ignoreLogin && (userStore!.isShowLogin = true);
             }
             return r.json();
         }
@@ -42,18 +42,21 @@ export function jFetch(o: { method: "GET" | "POST", url: string, data?: any; }):
     });
 }
 
-export function jFetchFormdata(o: { url: string, formdata: FormData; }) {
+export function jFetchFormdata(o: { url: string, formdata: FormData; }, other?: JFetchOtherType) {
+    if (!other) {
+        other = {};
+    }
     const headers = new Headers({
         'token': userStore!.userInfo?.token || "",
     } as JHeaderType);
-    return new Promise((res, rej) => {
+    return new Promise(async (res, rej) => {
         return fetch(import.meta.env.VITE_API_BASE_URL + o.url, {
             method: "POST",
             headers,
             body: o.formdata,
         }).then(r => {
             if (r.status == 401) {
-                userStore!.isShowLogin = true;
+                !other.ignoreLogin && (userStore!.isShowLogin = true);
             }
             return r.json();
         }
@@ -63,4 +66,38 @@ export function jFetchFormdata(o: { url: string, formdata: FormData; }) {
             rej(e);
         });
     });
+}
+
+export function jFetchUpload(o: UploadFileDataType & {
+    formdata: FormData;
+}) {
+    return jFetchFormdata({
+        url: `${commonUtils.uploadBaseUrl}?privateType=${o.privateType || ""}&type=${o.type || ""}&dir=${encodeURIComponent(o.dir || "")}`,
+        formdata: o.formdata,
+    }) as Promise<UploadFileReturnType>;
+};
+
+export type JFetchFileType = {
+    token?: string;
+    url: string;
+    isPrivate?: boolean;
+};
+
+export function jFetchFileUrl(o: JFetchFileType) {
+    let url = "";
+    if (o.isPrivate) {
+        url = import.meta.env.VITE_API_BASE_URL + commonUtils.privateResBaseUrl + `/${o.token || ""}/${o.url}`;
+    }
+    else {
+        url = import.meta.env.VITE_API_BASE_URL + commonUtils.resBaseUrl + `/${o.url}`;
+    }
+    return url;
+}
+export function jFetchFile(o: JFetchFileType) {
+    const headers = new Headers({
+        'token': userStore!.userInfo?.token || "",
+    } as JHeaderType);
+    let url = jFetchFileUrl(o);
+    return fetch(url, { method: "GET", headers });
+
 }

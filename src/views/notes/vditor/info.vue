@@ -15,23 +15,35 @@ import { useRoute } from 'vue-router'
 import Vditor from 'vditor'
 // import 'vditor'
 import '@/assets/vditor/less/index.less'
-import { UtilsApis } from '../../../apis/ApisList'
-import { jFetch, jFetchFormdata } from '@/utils/jFetch'
+import { UserApis, UtilsApis } from '@/apis/ApisList'
+import { jFetch, jFetchFile, jFetchFormdata, jFetchUpload } from '@/utils/jFetch'
+import { useUserStore } from '@/stores/userStore'
 
 const routerStore = useRouterStore()
 const message = useMessage()
 const route = useRoute()
+const userStore = useUserStore()
 
 const divRef = ref<HTMLDivElement>()
 
 const uuid = (route.query.uuid || '') as string
 const name = (route.query.name || '') as string
+/** 私有token */
+let privateToken = (route.query.privateToken as string) || ''
+let mdStr = ''
 
-onMounted(() => {
-  if (!uuid) {
-    message.error('无法找到页面')
+/** 判断状态 */
+const checkStatus = async () => {
+  if (!userStore.checkIsLogin()) {
+    userStore.isShowLogin = true
+    return false
   }
-  console.time('vditor')
+  const { data } = await UserApis.getPrivateResToken({ type: 'markdowns' })
+
+  privateToken = data.token
+}
+
+const createVditor = () => {
   const v = new Vditor(divRef.value!, {
     cache: { enable: true, id: uuid },
     height: '100%',
@@ -43,24 +55,34 @@ onMounted(() => {
       theme: {
         current: 'dark',
       },
+      markdown: {
+        linkBase: `${import.meta.env.VITE_API_BASE_URL}privateRes/${privateToken}`,
+      },
     },
     upload: {
       fieldName: 'file',
       validate(file) {
-        console.log(file)
         return true
       },
       async handler(file) {
-        console.log('handler')
+        if (!userStore.userInfo.token) console.log('handler')
         const formdata = new FormData()
-        console.log(file[0])
+        // console.log(file[0])
         formdata.append('file', file[0])
-        const res = await jFetchFormdata({
-          url: `upload?type=markdown&uuid=${uuid}`,
+        const res = await jFetchUpload({
           formdata: formdata,
+          privateType: 'markdown',
+          dir: uuid,
         })
-        console.log(res)
-        return 'xx'
+        if (res.code == 200) {
+          v.insertValue(`![${res.data.filename}](${res.data.displayUrl})`)
+          return '上传成功'
+        } else if (res.code == 401) {
+          return '请先登录'
+        } else if (res.code == 404) {
+          return '上传错误位置'
+        }
+        return ''
       },
     },
     toolbar: [
@@ -109,20 +131,33 @@ onMounted(() => {
       },
     ],
   })
-})
-
-const toCreate = async () => {
-  const res = await UtilsApis.nanoid()
-  console.log(res)
-  if (res.code != 200) {
-    message.error(res.msg)
-  }
-
-  routerStore.toUrl({
-    url: '/notes/vditor/info',
-    query: { id: 'create' },
-  })
+  return v
 }
+
+const init = async () => {
+  const { data } = await UserApis.getPrivateResToken({ type: 'markdowns' }, { ignoreLogin: true })
+  if (data) {
+    privateToken = data.token
+  }
+  if (privateToken) {
+    mdStr = await jFetchFile({
+      isPrivate: true,
+      token: privateToken,
+      url: `${uuid}/index.md`,
+    }).then((res) => res.text())
+  }
+  const v = createVditor()
+  v.setValue(mdStr, true)
+}
+
+onMounted(() => {
+  if (!uuid) {
+    message.error('无法找到页面')
+    return
+  }
+  console.time('vditor')
+  init()
+})
 </script>
 <style lang="scss" scoped>
 .box {

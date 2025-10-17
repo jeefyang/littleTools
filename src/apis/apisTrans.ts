@@ -9,11 +9,11 @@ export function apisTrans<T extends { from?: any, to?: any; }, D extends { [x in
     const newData: ApiReturnType<T, D> = {} as ApiReturnType<T, D>;
     for (const key in o) {
         const c = o[key as keyof D];
-        newData[key as keyof D] = ((data?: any) => jFetch({
+        newData[key as keyof D] = ((data?: any, other?: JFetchOtherType) => jFetch({
             method: c.method,
             url: c.url,
             data: data
-        })) as JFetchApiType<typeof c.type>;
+        }, other || {})) as JFetchApiType<typeof c.type>;
     }
     return newData;
 };
