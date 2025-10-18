@@ -64,15 +64,16 @@ const createVditor = () => {
       validate(file) {
         return true
       },
-      async handler(file) {
+      async handler(files) {
         if (!userStore.userInfo.token) console.log('handler')
         const formdata = new FormData()
         // console.log(file[0])
-        formdata.append('file', file[0])
+        formdata.append('file', files[0])
         const res = await jFetchUpload({
           formdata: formdata,
           privateType: 'markdown',
           dir: uuid,
+          renameType: 'sha256',
         })
         if (res.code == 200) {
           v.insertValue(`![${res.data.filename}](${res.data.displayUrl})`)

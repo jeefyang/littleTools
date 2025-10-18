@@ -35,8 +35,8 @@ type JFetchApiType<T extends { from?: any, to?: any; }> = undefined extends T['f
 
 
 
-type uploadFilePrivateType = 'markdown';
-type uploadFileType = "xx";
+type UploadFilePrivateType = 'markdown';
+type UploadFileType = "xx";
 
 type UploadFileReturnType = JResposeType<{
     to:
@@ -47,10 +47,17 @@ type UploadFileReturnType = JResposeType<{
     };
 }>;
 
+type UploadFileRenameType = "uuid16" | "md5" | "forceName" | "time-uuid6" | "originName" | "md5-name" | "sha256" | "sha256-name" | "uuid6-name";
+
 type UploadFileDataType = {
-    privateType?: uploadFilePrivateType;
-    dir: string;
-    type?: uploadFileType;
-    filename?: string;
+    privateType?: UploadFilePrivateType;
+    dir?: string;
+    type?: UploadFileType;
+    override?: boolean;
+    renameType?: UploadFileRenameType;
+    forceName?: string;
+    /** 进制,默认32进制,减少字符,只用于md5或者sha256 */
+    binaryType?: 16 | 32;
+
 };
 

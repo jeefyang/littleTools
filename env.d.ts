@@ -17,6 +17,8 @@ type env = {
     VITE_INIT_LOGIN_USERNAME: string;
     /** 初始密码 */
     VITE_INIT_LOGIN_PASSWORD: string;
+    /** 临时目录 */
+    VITE_TEMP_DIR: string;
 };
 
 declare namespace NodeJS {

@@ -58,6 +58,11 @@ export class Main {
             this.privateResToken.pop();
         });
 
+        // 创建临时目录
+        if (!fs.existsSync(process.env.VITE_TEMP_DIR)) {
+            fs.mkdirSync(process.env.VITE_TEMP_DIR, { recursive: true });
+        }
+
         await this.db.init();
         this.setPlugin();
         this.setCapture();
