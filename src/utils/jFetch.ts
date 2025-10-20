@@ -71,8 +71,12 @@ export function jFetchFormdata(o: { url: string, formdata: FormData; }, other?: 
 export function jFetchUpload(o: UploadFileDataType & {
     formdata: FormData;
 }) {
+    // @ts-expect-error
+    const list: { key: string, value: string; }[] = Object.keys(o).filter(c => c != 'formdata').map(c => ({ key: c, value: o[c] }));
+    list;
+    const str = list.map(c => `${c.key}=${(c.value == undefined || c.value == null) ? "" : encodeURIComponent(c.value)}`).join("&");
     return jFetchFormdata({
-        url: `${commonUtils.uploadBaseUrl}?privateType=${o.privateType || ""}&type=${o.type || ""}&dir=${encodeURIComponent(o.dir || "")}`,
+        url: `${commonUtils.uploadBaseUrl}?${str}`,
         formdata: o.formdata,
     }) as Promise<UploadFileReturnType>;
 };

@@ -30,23 +30,30 @@ export function uploadApis(this: Main) {
 
     const getQuery = (req: any) => {
         const query = req.query as UploadFileDataType;
+
         // 解码一下
-        query.dir && (query.dir = decodeURIComponent(query.dir!));
+        Object.keys(query).forEach(key => {
+            // @ts-expect-error
+            query[key] = decodeURIComponent(query[key]);
+        });
         !query.renameType && (query.renameType = "time-uuid6");
-        !query.binaryType && (query.binaryType = 32);
+        !query.binaryType && (query.binaryType = "32");
         return query;
     };
 
+    /** 获取文件hash值 */
     const getHash = (query: UploadFileDataType, p: string) => {
-        const b = fs.readFileSync('p');
+        const b = fs.readFileSync(p);
         const type = query.renameType!.includes("md5") ? 'md5' : query.renameType!.includes("sha256") ? 'sha256' : "";
         if (!type) return "";
         let hash = crypto.createHash(type).update(b).digest('hex');
-        query.binaryType == 32 && (hash = BigInt('0x' + hash).toString(32));
+        query.binaryType == "32" && (hash = BigInt('0x' + hash).toString(32));
         return hash;
     };
 
+    /** 获取文件名 */
     const getFileName = (query: UploadFileDataType, temp: TempFileType) => {
+        console.log(query.renameType);
         if (query.renameType == 'originName') {
             return temp.originFilename;
         }
@@ -81,6 +88,8 @@ export function uploadApis(this: Main) {
 
         return temp.originFilename;
     };
+
+    /** 获取文件目录 */
     const getDirPath = (query: UploadFileDataType, temp: TempFileType) => {
         let p = "";
         // 普通资源类型
@@ -111,6 +120,7 @@ export function uploadApis(this: Main) {
         return p;
     };
 
+    /** 最终处理文件 */
     const processFile = (temp_file: TempFileType, query: UploadFileDataType,) => {
         const res: JResposeType = {
             code: base.statusMap.success,
@@ -170,15 +180,12 @@ export function uploadApis(this: Main) {
     };
 
     this.appPost(process.env.VITE_API_BASE_URL + commonUtils.uploadBaseUrl, (req, res, next) => {
-
-
         const query = getQuery(req);
         // 是由目录需要验证登录
         if (query.privateType && !base.verifyToken(req)) {
             return base.returnStatus("noAuth", res, "请先登录");
         }
         let temp_file_list: TempFileType[] = [];
-
 
         const form = formidable({
             maxFileSize: 1024 * 1024 * 1024,

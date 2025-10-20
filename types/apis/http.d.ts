@@ -49,6 +49,7 @@ type UploadFileReturnType = JResposeType<{
 
 type UploadFileRenameType = "uuid16" | "md5" | "forceName" | "time-uuid6" | "originName" | "md5-name" | "sha256" | "sha256-name" | "uuid6-name";
 
+// 由于要解码,请使用string类型或者扩展
 type UploadFileDataType = {
     privateType?: UploadFilePrivateType;
     dir?: string;
@@ -57,7 +58,7 @@ type UploadFileDataType = {
     renameType?: UploadFileRenameType;
     forceName?: string;
     /** 进制,默认32进制,减少字符,只用于md5或者sha256 */
-    binaryType?: 16 | 32;
+    binaryType?: "16" | "32";
 
 };
 

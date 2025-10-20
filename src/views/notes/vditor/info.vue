@@ -5,10 +5,48 @@
   <!-- $secondName:uuid -->
 
   <!-- -->
+  <!-- 主页面 -->
   <div ref="divRef" class="box"></div>
+  <!-- 设置 -->
+  <n-modal
+    v-model:show="showModal"
+    preset="card"
+    title="设置"
+    size="huge"
+    :bordered="false"
+    style="width: 600px"
+    @close="closeConfigModalFn"
+  >
+    <div class="mb-2">标题</div>
+    <n-input v-model:value="formdata.name" type="text" placeholder="请输入文章标题" />
+    <div class="mt-2 mb-2">描述</div>
+    <n-input v-model:value="formdata.name" type="text" placeholder="请输入文章描述" />
+    <div class="mt-2 mb-2">标签</div>
+    <div>
+      <n-tag
+        class="m-1 tag"
+        v-for="(item, index) in tagsList"
+        :key="index"
+        :type="formdata.tags.includes(item) ? 'default' : 'primary'"
+        @click="selectTagFn(item)"
+        >{{ item }}</n-tag
+      >
+    </div>
+    <n-input
+      style="width: 50%"
+      v-model:value="newTag"
+      type="text"
+      placeholder="新增新的标签"
+      class="mr-4"
+    ></n-input>
+    <n-button @click="addNewTagFn">新增</n-button>
+    <template #footer>
+      <n-button type="primary" @click="saveConfigFn">保存确认</n-button>
+    </template>
+  </n-modal>
 </template>
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRouterStore } from '@/stores/routerStore'
 import { useMessage } from 'naive-ui'
 import { useRoute } from 'vue-router'
@@ -24,7 +62,21 @@ const message = useMessage()
 const route = useRoute()
 const userStore = useUserStore()
 
+let oldFormdata: {
+  name: string
+  tags: string[]
+  desc: string
+} = {
+  name: '',
+  tags: [],
+  desc: '',
+}
+const formdata = reactive({ ...oldFormdata })
+const tagsList = ref(['xx', 'bb', 'aaa'])
+
 const divRef = ref<HTMLDivElement>()
+const showModal = ref(false)
+const newTag = ref('')
 
 const uuid = (route.query.uuid || '') as string
 const name = (route.query.name || '') as string
@@ -43,6 +95,43 @@ const checkStatus = async () => {
   privateToken = data.token
 }
 
+/** 关闭设置弹窗 */
+const closeConfigModalFn = () => {
+  Object.keys(formdata).forEach((key) => {
+    // @ts-expect-error
+    formdata[key] = oldFormdata[key]
+  })
+}
+
+/** 选择标签 */
+const selectTagFn = (tag: string) => {
+  const index = formdata.tags.indexOf(tag)
+  if (index == -1) {
+    formdata.tags.push(tag)
+  } else {
+    formdata.tags.splice(index, 1)
+  }
+}
+
+/** 新增新标签 */
+const addNewTagFn = () => {
+  const index = tagsList.value.indexOf(newTag.value)
+  if (index != -1) {
+    message.warning('标签已存在')
+    return
+  }
+  tagsList.value.push(newTag.value)
+  newTag.value = ''
+  selectTagFn(newTag.value)
+}
+
+/** 保存设置 */
+const saveConfigFn = () => {}
+
+/** 保存文章 */
+const saveContentFn = async () => {}
+
+/** 创建对象 */
 const createVditor = () => {
   const v = new Vditor(divRef.value!, {
     cache: { enable: true, id: uuid },
@@ -73,7 +162,7 @@ const createVditor = () => {
           formdata: formdata,
           privateType: 'markdown',
           dir: uuid,
-          renameType: 'sha256',
+          renameType: 'md5',
         })
         if (res.code == 200) {
           v.insertValue(`![${res.data.filename}](${res.data.displayUrl})`)
@@ -128,6 +217,22 @@ const createVditor = () => {
           'devtools',
           'info',
           'help',
+          {
+            hotkey: '⌘S',
+            name: 'save',
+            icon: '保存',
+            click: async () => {
+              await saveContentFn()
+            },
+          },
+          {
+            name: 'config',
+            icon: '设置',
+            click: async () => {
+              oldFormdata = { ...formdata }
+              showModal.value = true
+            },
+          },
         ],
       },
     ],
@@ -163,5 +268,11 @@ onMounted(() => {
 <style lang="scss" scoped>
 .box {
   height: 100%;
+}
+.tag {
+  user-select: none;
+}
+.tag:hover {
+  cursor: pointer;
 }
 </style>
