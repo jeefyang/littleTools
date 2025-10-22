@@ -1,7 +1,7 @@
 
 
 
-interface UserApiLogin {
+type UserApiLogin = {
     from: {
         username: string,
         password: string;
@@ -11,13 +11,13 @@ interface UserApiLogin {
         email: string;
         username: string;
     };
-}
+};
 
-interface userApiGetPrivateResToken {
+type userApiGetPrivateResToken = {
     to: {
         token: string;
     };
     from: {
         type: string;
     };
-}
+};

@@ -20,6 +20,24 @@ type TempFileType = {
 export function uploadApis(this: Main) {
 
     const base = new Base("", {});
+    // 公有白名单写入
+    const public_whiteList: UploadFileType[] = ['xx'];
+    /** 公有文件类型目录白名单写入 */
+    const public_fileType_whiteList: UploadFileType[] = [];
+    /** 公有文件目录转换白名单 */
+    const public_transFolder_whiteList: { [x
+        in UploadFileType]?: string } = {
+
+    };
+    /** 私有白名单写入 */
+    const private_whiteList: UploadFilePrivateType[] = [];
+    /** 私有文件类型目录白名单写入 */
+    const private_fileType_whiteList: UploadFilePrivateType[] = ["markdown"];
+    /** 私有文件目录转换白名单 */
+    const private_transFolder_whiteList: { [x
+        in UploadFilePrivateType]?: string } = {
+        'markdown': "markdowns",
+    };
 
 
     const fileType: { name: string, list: string[]; }[] = [
@@ -92,30 +110,38 @@ export function uploadApis(this: Main) {
     /** 获取文件目录 */
     const getDirPath = (query: UploadFileDataType, temp: TempFileType) => {
         let p = "";
-        // 普通资源类型
-        if (query.type) {
-            // 白名单写入
-            const whiteList: UploadFileType[] = ['xx'];
-            if (whiteList.includes(query.type)) {
-                p = path.join(process.env.VITE_PRIVATE_RES_DIR, query.type, query.dir || "");
-            }
-
+        // 白名单没过
+        if (
+            query.type && !public_whiteList.includes(query.type)
+            ||
+            query.privateType && !private_whiteList.includes(query.privateType)
+        ) {
+            return p;
         }
-        // 私有资源类型
-        else if (query.privateType) {
-            // 特殊目录
-            if (query.privateType == 'markdown') {
-                const folderName = fileType.find(c => c.list.includes(temp.originExt.split('.').reverse()[0]))?.name || "others";
-                p = path.join(process.env.VITE_PRIVATE_RES_DIR, 'markdowns', query.dir || "", folderName);
-            }
-            // 白名单写入
-            else {
-                const whiteList: UploadFilePrivateType[] = [];
-                if (whiteList.includes(query.privateType)) {
-                    p = path.join(process.env.VITE_PRIVATE_RES_DIR, query.privateType, query.dir || "");
-                }
-            }
-
+        /** 公有/私有 */
+        const baseDir = query.type ? process.env.VITE_RES_DIR : query.privateType ? process.env.VITE_PRIVATE_RES_DIR : "";
+        if (!baseDir) {
+            return p;
+        }
+        /** 分类目录 */
+        const typeDir = query.type ? (public_transFolder_whiteList[query.type] || query.type) : query.privateType ? (private_transFolder_whiteList[query.privateType] || query.privateType) : "";
+        if (!typeDir) {
+            return p;
+        }
+        /** 文件类型目录 */
+        let fileTypeFolder = "";
+        if (
+            (query.type && public_fileType_whiteList.includes(query.type)) ||
+            (query.privateType && private_fileType_whiteList.includes(query.privateType))
+        ) {
+            fileTypeFolder = fileType.find(c => c.list.includes(temp.originExt.split('.').reverse()[0]))?.name || "others";
+        }
+        /** 指定目录 */
+        const dir = query.dir || "";
+        p = path.join(baseDir, typeDir, dir, fileTypeFolder);
+        // 相当于匹配不成功
+        if (p == '.') {
+            p = '';
         }
         return p;
     };
@@ -176,7 +202,6 @@ export function uploadApis(this: Main) {
                 filename
             }
         } as UploadFileReturnType;
-
     };
 
     this.appPost(process.env.VITE_API_BASE_URL + commonUtils.uploadBaseUrl, (req, res, next) => {
@@ -202,7 +227,6 @@ export function uploadApis(this: Main) {
                 return id;
             }
         });
-
 
         form.parse(req, (err, fields, files) => {
             if (err) {

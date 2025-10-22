@@ -53,7 +53,7 @@ import { useRoute } from 'vue-router'
 import Vditor from 'vditor'
 // import 'vditor'
 import '@/assets/vditor/less/index.less'
-import { UserApis, UtilsApis } from '@/apis/ApisList'
+import { NotesApis, UserApis, UtilsApis } from '@/apis/ApisList'
 import { jFetch, jFetchFile, jFetchFormdata, jFetchUpload } from '@/utils/jFetch'
 import { useUserStore } from '@/stores/userStore'
 
@@ -72,7 +72,7 @@ let oldFormdata: {
   desc: '',
 }
 const formdata = reactive({ ...oldFormdata })
-const tagsList = ref(['xx', 'bb', 'aaa'])
+const tagsList = ref(<string[]>[])
 
 const divRef = ref<HTMLDivElement>()
 const showModal = ref(false)
@@ -132,11 +132,14 @@ const saveConfigFn = () => {}
 const saveContentFn = async () => {}
 
 /** 创建对象 */
-const createVditor = () => {
+const createVditor = (content?: string) => {
   const v = new Vditor(divRef.value!, {
     cache: { enable: true, id: uuid },
     height: '100%',
     after: () => {
+      if (content != '' && content != undefined) {
+        v.setValue(content, true)
+      }
       console.timeEnd('vditor')
     },
     theme: 'dark',
@@ -240,20 +243,32 @@ const createVditor = () => {
   return v
 }
 
+const getTagsList = async () => {
+  const { data, code } = await NotesApis.markdownTagList()
+  if (data) {
+    tagsList.value = data.list
+  }
+}
+
 const init = async () => {
   const { data } = await UserApis.getPrivateResToken({ type: 'markdowns' }, { ignoreLogin: true })
   if (data) {
     privateToken = data.token
   }
   if (privateToken) {
-    mdStr = await jFetchFile({
+    const res = await jFetchFile({
       isPrivate: true,
       token: privateToken,
       url: `${uuid}/index.md`,
-    }).then((res) => res.text())
+    })
+    console.log(res.status)
+    if (res.status == 200) {
+      mdStr = await res.text()
+    }
   }
-  const v = createVditor()
-  v.setValue(mdStr, true)
+  console.log(mdStr)
+  const v = createVditor(mdStr)
+  await getTagsList()
 }
 
 onMounted(() => {

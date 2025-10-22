@@ -14,6 +14,7 @@ export const up = async (knex) => {
         table.text("desc")
         table.text("type")
         table.text("other")
+        
         table.timestamps(true, true);
     });
 };

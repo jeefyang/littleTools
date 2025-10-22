@@ -31,3 +31,17 @@ pnpm dev
 ```sh
 pnpm build
 ```
+
+### 开发要义
+
+1.数据库创建记录
+
+```sh
+npm run migrate:make "xx"
+```
+
+2.数据库创建更新
+
+```sh
+npm run migrate:latest
+```

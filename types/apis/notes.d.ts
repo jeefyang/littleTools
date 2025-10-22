@@ -1,25 +1,59 @@
 
-type VditorContentType = {
+type MarkdownContentType = {
     uuid: string;
     content?: string;
-    tags?: string;
+    tags?: string[];
     desc?: string;
     name?: string;
     createDate?: number;
     fixDate?: number;
 };
 
-interface NotesApiVditorCreate {
-    from: VditorContentType;
-}
+type NotesApiMarkdownCreate = {
+    from: MarkdownContentType;
+};
 
-interface NotesApiVditorEdit {
-    from: VditorContentType;
-}
+type NotesApiMarkdownEdit = {
+    from: MarkdownContentType;
+};
+
+type NotesApiMarkdownList = {
+    from: {
+        tags?: string[],
+        name?: string,
+        fixStart?: number;
+        fixEnd?: number,
+        createStart?: number;
+        createEnd?: number;
+    };
+    to: {
+        list: {
+            uuid: string;
+            desc: string;
+            name: string;
+            tags: string[];
+            createDate: number;
+            fixDate: number;
+        }[];
+    };
+};
+
+type NotesApiMarkdownTagList = {
+
+    to: {
+        list: string[];
+    };
+};
+
+type NotesApiMarkdownDelete = {
+    from: {
+        uuid: string;
+    };
+};
 
 
-interface NotesApiVditorUpload {
+type NotesApiMarkdownUpload = {
     query: {
         uuid: string;
     };
-}
+};

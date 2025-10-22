@@ -53,6 +53,7 @@ const toCreate = async () => {
       uuid: res.data.id,
       name: noteName.value || defaultNoteName,
       privateToken: privateToken,
+      tpye: 'markdown',
     },
   })
 }
