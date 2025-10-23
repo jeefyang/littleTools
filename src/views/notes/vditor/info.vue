@@ -83,6 +83,8 @@ const name = (route.query.name || '') as string
 /** 私有token */
 let privateToken = (route.query.privateToken as string) || ''
 let mdStr = ''
+/** 是否为新建 */
+let isNew = true
 
 /** 判断状态 */
 const checkStatus = async () => {
@@ -256,18 +258,22 @@ const init = async () => {
     privateToken = data.token
   }
   if (privateToken) {
-    const res = await jFetchFile({
-      isPrivate: true,
-      token: privateToken,
-      url: `${uuid}/index.md`,
-    })
-    console.log(res.status)
-    if (res.status == 200) {
-      mdStr = await res.text()
+    const isNewRes = await NotesApis.markdownIsNew({ uuid: uuid })
+    if (isNewRes.data && isNewRes.data.isNew === false) {
+      isNew = false
+    }
+    if (!isNew) {
+      const res = await jFetchFile({
+        isPrivate: true,
+        token: privateToken,
+        url: `${uuid}/index.md`,
+      })
+      if (res.status == 200) {
+        mdStr = await res.text()
+      }
     }
   }
-  console.log(mdStr)
-  const v = createVditor(mdStr)
+  createVditor(mdStr)
   await getTagsList()
 }
 

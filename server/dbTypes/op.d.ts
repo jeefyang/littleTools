@@ -4,4 +4,5 @@ export interface OPMapKey {
     type: string;
     tsType: string;
     value: string;
+    desc: string;
 }

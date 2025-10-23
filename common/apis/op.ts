@@ -24,10 +24,12 @@ export const whiteList_opMapKey: {
     key: whiteList_opMapKey_keyname,
     type?: keyof OPApiMapKeyValueType,
     tsType?: string,
+    desc: string;
 }[] = [
         {
             key: "markdown_tagList",
             type: "array",
-            tsType: "string[]"
+            tsType: "string[]",
+            desc: "markdown标签列表"
         }
     ];

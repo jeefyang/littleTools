@@ -57,3 +57,12 @@ type NotesApiMarkdownUpload = {
         uuid: string;
     };
 };
+
+type NoteApiMarkdownIsNew = {
+    from: {
+        uuid: string;
+    };
+    to: {
+        isNew: boolean;
+    };
+};

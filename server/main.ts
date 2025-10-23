@@ -4,11 +4,13 @@ import express from "express";
 import cors from "cors";
 import { userApis } from "./apis/user";
 import { UtilsApis } from "./apis/utils";
+import { NotesApis } from "./apis/notes";
 import { KnexDB } from "./knex_db";
 import { commonApis } from "./apis/common";
 import { uploadApis } from "./apis/upload";
 import { nanoid } from "nanoid";
 import { scheduleJob } from "node-schedule";
+
 
 // 定义错误接口
 interface AppError extends Error {
@@ -135,6 +137,7 @@ export class Main {
         // 其他接口
         userApis.bind(this)();
         UtilsApis.bind(this)();
+        NotesApis.bind(this)();
 
         // 没有接口
         this.app.get("/api/{*splat}", (req, res) => {

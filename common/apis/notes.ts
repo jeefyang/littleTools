@@ -9,4 +9,5 @@ export const NotesApiUrls = apiUrlsTrans(headerUrl, {
     markdownList: { method: 'POST', type: {} as NotesApiMarkdownList },
     markdownDelete: { method: 'POST', type: {} as NotesApiMarkdownDelete },
     markdownTagList: { method: 'GET', type: {} as NotesApiMarkdownTagList },
+    markdownIsNew: { method: 'POST', type: {} as NoteApiMarkdownIsNew },
 });

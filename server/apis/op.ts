@@ -38,7 +38,8 @@ export function OPApis(this: Main) {
                 key,
                 type,
                 tsType: whiteList_opMapKey[index]?.tsType || "",
-                value: opMapKeyDefaultStr[type]
+                value: opMapKeyDefaultStr[type],
+                desc: whiteList_opMapKey[index]?.desc || "",
             };
             await this.db.table('opMapKey').insert({ ...line });
         }
@@ -97,7 +98,8 @@ export function OPApis(this: Main) {
                     key,
                     type,
                     tsType: whiteList_opMapKey[index]?.tsType || "",
-                    value: opMapKeyDefaultStr[type]
+                    value: opMapKeyDefaultStr[type],
+                    desc: whiteList_opMapKey[index]?.desc || "",
                 };
             }
             if (type == "string" || type == 'number') {

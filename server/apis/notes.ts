@@ -184,8 +184,25 @@ export function NotesApis(this: Main) {
         return res.status(base.statusMap.success).json(decode_markdownTagList.getResult({
             data: { list }
         }));
+    });
 
+    /** 是否为新建markdown */
+    const decode_markdownIsNew = base.decode.markdownIsNew;
+    this.appPost(decode_markdownIsNew.url, async (req, res) => {
 
+        if (!base.verifyToken(req)) {
+            return base.returnStatus("noAuth", res, "请先登录");
+        }
+
+        const body = decode_markdownIsNew.getBody(req);
+        if (!body.uuid) {
+            return base.returnStatus("noData", res, "数据错误");
+        }
+
+        const lines = await this.db.where("markdowns", { uuid: body.uuid });
+        return res.status(base.statusMap.success).json(decode_markdownIsNew.getResult({
+            data: { isNew: lines.length == 0 }
+        }));
     });
 
 
